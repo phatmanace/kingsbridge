@@ -1,0 +1,116 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ArticleGet	hnfetcher.c	/^struct article* ArticleGet(struct article *list, int x){$/;"	f
+ArticleSize	hnfetcher.c	/^int ArticleSize(struct article *list){$/;"	f
+BORDER	grabber.c	14;"	d	file:
+DumpArticles	hnfetcher.c	/^void DumpArticles(struct article *list){$/;"	f
+FOOTER_MODE	grabber.c	/^enum FOOTER_MODE$/;"	g	file:
+FetchArticles	hnfetcher.c	/^void FetchArticles(struct article *head){$/;"	f
+JSMN_ARRAY	jsmn.h	/^	JSMN_ARRAY = 2,$/;"	e	enum:__anon2
+JSMN_ERROR_INVAL	jsmn.h	/^	JSMN_ERROR_INVAL = -2,$/;"	e	enum:__anon3
+JSMN_ERROR_NOMEM	jsmn.h	/^	JSMN_ERROR_NOMEM = -1,$/;"	e	enum:__anon3
+JSMN_ERROR_PART	jsmn.h	/^	JSMN_ERROR_PART = -3$/;"	e	enum:__anon3
+JSMN_OBJECT	jsmn.h	/^	JSMN_OBJECT = 1,$/;"	e	enum:__anon2
+JSMN_PRIMITIVE	jsmn.h	/^	JSMN_PRIMITIVE = 0,$/;"	e	enum:__anon2
+JSMN_STRING	jsmn.h	/^	JSMN_STRING = 3$/;"	e	enum:__anon2
+NCOLS	examples/ex_panel1.c	11;"	d	file:
+NCOLS	examples/ex_panel2.c	8;"	d	file:
+NLINES	examples/ex_panel1.c	10;"	d	file:
+NLINES	examples/ex_panel2.c	7;"	d	file:
+NORMAL	grabber.c	/^    NORMAL,$/;"	e	enum:FOOTER_MODE	file:
+PANEL_DATA	examples/ex_panel1.c	/^}PANEL_DATA;$/;"	t	typeref:struct:_PANEL_DATA	file:
+PANEL_DATA	examples/ex_panel2.c	/^}PANEL_DATA;$/;"	t	typeref:struct:_PANEL_DATA	file:
+SEARCH	grabber.c	/^    SEARCH$/;"	e	enum:FOOTER_MODE	file:
+TRUE	examples/example_.c	58;"	d	file:
+TRUE	examples/example_1.c	58;"	d	file:
+TRUE	examples/example_2.c	58;"	d	file:
+_PANEL_DATA	examples/ex_panel1.c	/^typedef struct _PANEL_DATA {$/;"	s	file:
+_PANEL_DATA	examples/ex_panel2.c	/^typedef struct _PANEL_DATA {$/;"	s	file:
+__JSMN_H_	jsmn.h	2;"	d
+add_article	hnfetcher.c	/^void add_article(struct article *list, char *text, char *link, char *hash)$/;"	f
+appendHTMLChunk	hnfetcher.c	/^size_t appendHTMLChunk(void *ptr, size_t size, size_t memb, struct string *s){$/;"	f
+applySearch	grabber.c	/^void applySearch(struct article *list) {$/;"	f
+article	hnarticle.h	/^struct article{$/;"	s
+c	grabber.c	/^zlog_category_t *c;$/;"	v
+create_newwin	grabber.c	/^WINDOW *create_newwin(int height, int width, int starty, int startx)$/;"	f
+destroy_win	grabber.c	/^void destroy_win(WINDOW *local_win)$/;"	f
+determineNewViewport	grabber.c	/^int determineNewViewport(int direction, int length) {$/;"	f
+drawFooter	grabber.c	/^void drawFooter(struct article *list, int starty, int startx) {$/;"	f
+drawHeader	grabber.c	/^void drawHeader() {$/;"	f
+end	jsmn.h	/^	int end;$/;"	m	struct:__anon4
+fileData	parse_config.c	/^static unsigned char fileData[65536];$/;"	v	file:
+flags	hnarticle.h	/^	int flags;$/;"	m	struct:article
+fmode	grabber.c	/^enum FOOTER_MODE fmode = NORMAL;$/;"	v	typeref:enum:FOOTER_MODE
+footer_mode	grabber.c	/^} footer_mode;$/;"	v	typeref:enum:FOOTER_MODE
+h	examples/ex_panel1.c	/^	int x, y, w, h;$/;"	m	struct:_PANEL_DATA	file:
+hide	examples/ex_panel2.c	/^	int hide;	\/* TRUE if panel is hidden *\/$/;"	m	struct:_PANEL_DATA	file:
+init_articles	hnfetcher.c	/^void init_articles(struct article *a){$/;"	f
+init_string	hnfetcher.c	/^void init_string(struct string *s) {$/;"	f
+init_wins	examples/ex_panel1.c	/^void init_wins(WINDOW **wins, int n)$/;"	f
+init_wins	examples/ex_panel2.c	/^void init_wins(WINDOW **wins, int n)$/;"	f
+inputmode	grabber.c	/^bool inputmode = FALSE;$/;"	v
+intptr_t	examples/example_.c	/^     typedef __int64 intptr_t;$/;"	t	file:
+intptr_t	examples/example_.c	/^     typedef int intptr_t;$/;"	t	file:
+intptr_t	examples/example_.c	63;"	d	file:
+intptr_t	examples/example_1.c	/^     typedef __int64 intptr_t;$/;"	t	file:
+intptr_t	examples/example_1.c	/^     typedef int intptr_t;$/;"	t	file:
+intptr_t	examples/example_1.c	63;"	d	file:
+intptr_t	examples/example_2.c	/^     typedef __int64 intptr_t;$/;"	t	file:
+intptr_t	examples/example_2.c	/^     typedef int intptr_t;$/;"	t	file:
+intptr_t	examples/example_2.c	63;"	d	file:
+jsmn_parser	jsmn.h	/^} jsmn_parser;$/;"	t	typeref:struct:__anon5
+jsmnerr_t	jsmn.h	/^} jsmnerr_t;$/;"	t	typeref:enum:__anon3
+jsmntok_t	jsmn.h	/^} jsmntok_t;$/;"	t	typeref:struct:__anon4
+jsmntype_t	jsmn.h	/^} jsmntype_t;$/;"	t	typeref:enum:__anon2
+label	examples/ex_panel1.c	/^	char label[80]; $/;"	m	struct:_PANEL_DATA	file:
+label_color	examples/ex_panel1.c	/^	int label_color;$/;"	m	struct:_PANEL_DATA	file:
+len	hnfetcher.c	/^	size_t len;$/;"	m	struct:string	file:
+link	hnarticle.h	/^	char *link;$/;"	m	struct:article
+listwindow	grabber.c	/^} listwindow;$/;"	t	typeref:struct:__anon1	file:
+main	examples/ex_panel1.c	/^int main()$/;"	f
+main	examples/ex_panel2.c	/^int main()$/;"	f
+main	examples/example_.c	/^int main(int argc, char **argv)$/;"	f
+main	examples/example_1.c	/^int main(int argc, char **argv)$/;"	f
+main	examples/example_2.c	/^int main(int argc, char **argv)$/;"	f
+main	grabber.c	/^int main(void)$/;"	f
+main	parse_config.c	/^main(void)$/;"	f
+myStrCat	grabber.c	/^char *myStrCat (char *s, char *a) {$/;"	f
+my_ioctl	examples/example_.c	/^static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)$/;"	f	file:
+my_ioctl	examples/example_1.c	/^static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)$/;"	f	file:
+my_ioctl	examples/example_2.c	/^static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)$/;"	f	file:
+next	examples/ex_panel1.c	/^	PANEL *next;$/;"	m	struct:_PANEL_DATA	file:
+next	hnarticle.h	/^	struct article *next;$/;"	m	struct:article	typeref:struct:article::article
+openLink	grabber.c	/^void openLink(struct article *list) {$/;"	f
+other	hnarticle.h	/^	char *other;$/;"	m	struct:article
+parent	jsmn.h	/^	int parent;$/;"	m	struct:__anon4
+pos	jsmn.h	/^	unsigned int pos; \/* offset in the JSON string *\/$/;"	m	struct:__anon5
+print_in_middle	examples/ex_panel1.c	/^void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color)$/;"	f
+print_in_middle	examples/ex_panel2.c	/^void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color)$/;"	f
+ptr	hnfetcher.c	/^	char *ptr;$/;"	m	struct:string	file:
+read_callback	examples/example_.c	/^static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)$/;"	f	file:
+read_callback	examples/example_1.c	/^static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)$/;"	f	file:
+read_callback	examples/example_2.c	/^static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)$/;"	f	file:
+refreshWin	grabber.c	/^void refreshWin(struct article *list, int starty, int startx) {$/;"	f
+repeatStr	grabber.c	/^char *repeatStr (char *str, size_t count) {$/;"	f
+searchText	grabber.c	/^char *searchText;$/;"	v
+selected	grabber.c	/^int selected = BORDER + 1;$/;"	v
+set_user_ptrs	examples/ex_panel1.c	/^void set_user_ptrs(PANEL **panels, int n)$/;"	f
+size	jsmn.h	/^	int size;$/;"	m	struct:__anon4
+start	grabber.c	/^    int start;$/;"	m	struct:__anon1	file:
+start	jsmn.h	/^	int start;$/;"	m	struct:__anon4
+storyhash	hnarticle.h	/^	char *storyhash;$/;"	m	struct:article
+string	hnfetcher.c	/^struct string{$/;"	s	file:
+text	hnarticle.h	/^	char *text;$/;"	m	struct:article
+toknext	jsmn.h	/^	unsigned int toknext; \/* next token to allocate *\/$/;"	m	struct:__anon5
+toksuper	jsmn.h	/^	int toksuper; \/* superior token node, e.g parent object or array *\/$/;"	m	struct:__anon5
+type	jsmn.h	/^	jsmntype_t type;$/;"	m	struct:__anon4
+viewport	grabber.c	/^listwindow viewport;$/;"	v
+w	examples/ex_panel1.c	/^	int x, y, w, h;$/;"	m	struct:_PANEL_DATA	file:
+win_show	examples/ex_panel1.c	/^void win_show(WINDOW *win, char *label, int label_color)$/;"	f
+win_show	examples/ex_panel2.c	/^void win_show(WINDOW *win, char *label, int label_color)$/;"	f
+x	examples/ex_panel1.c	/^	int x, y, w, h;$/;"	m	struct:_PANEL_DATA	file:
+y	examples/ex_panel1.c	/^	int x, y, w, h;$/;"	m	struct:_PANEL_DATA	file:
