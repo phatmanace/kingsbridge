@@ -7,7 +7,7 @@
 /*
  * Create new comment node with nothing
  */
-comment_item_tree* newCommentTreeNode()
+comment_item_tree* newCommentTreeNode(int id)
 {
 	comment_item_tree* item = malloc(sizeof(comment_item_tree));
 
@@ -16,10 +16,11 @@ comment_item_tree* newCommentTreeNode()
 	item->previous = NULL;
 	item->parent   = NULL;
 	item->flags    = 0;
+	item->id       = id;
 	return item;
 }
 
-comment_item_tree* newCommentTreeNodeWithText(char* text)
+comment_item_tree* newCommentTreeNodeWithText(char* text, int id)
 {
 	printf("copying %s\n", text);
 	comment_item_tree* item = malloc(sizeof(comment_item_tree));
@@ -29,6 +30,7 @@ comment_item_tree* newCommentTreeNodeWithText(char* text)
 	item->parent     = NULL;
 	item->text       = malloc(strlen(text));
 	item->flags      = 0;
+	item->id         = id;
 	strcpy(item->text, text);
 	return item;
 }
@@ -244,6 +246,28 @@ int TotalSize(comment_item_tree* node)
 	return i;
 }
 
+comment_item_tree* FindById(comment_item_tree* node, int id)
+{
+	comment_item_tree* tmp = node;
+
+	if (tmp == NULL){
+		return 0;
+        }		
+	while (tmp != NULL) {
+		if(tmp->id == id){
+			return tmp;
+		}
+		if(tmp->children != NULL ){
+			comment_item_tree* child = NULL;
+			child = FindById(tmp->children, id);
+			if(child != NULL){
+				return child;
+			}
+		}
+		tmp = tmp->next;
+	}
+	return NULL;
+}
 
 int TotalNodeCount(const comment_item_tree* node)
 {

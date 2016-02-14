@@ -12,12 +12,14 @@ typedef struct comment_item_tree
   struct comment_item_tree* children;      
   struct comment_item_tree* parent;      
   int flags;
+  int id;
 } comment_item_tree;     
 
-comment_item_tree* newCommentTreeNode();
-comment_item_tree* newCommentTreeNodeWithText(char* text);
+comment_item_tree* newCommentTreeNode(int id);
+comment_item_tree* newCommentTreeNodeWithText(char* text, int id);
 
 int  SiblingCount(const comment_item_tree* node);
+comment_item_tree* FindById(comment_item_tree* node, int id);
 int  Size(comment_item_tree* node);
 int  TotalSize(comment_item_tree* node);
 int  TotalNodeCount(const comment_item_tree* node);
