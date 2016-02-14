@@ -79,7 +79,7 @@ int main(void){
     PrintTree(root, PRINT_ALL_TREE);
     assert(SiblingCount(root)   == 0);
     assert(TotalSize(root) == 11);
-    printf("all done... ok!\n");
+    printf("all done... Tests all pass!\n");
 
     return 0; 
 }
