@@ -49,6 +49,7 @@ int main(void){
     PrintTree(root, PRINT_ALL_TREE);
     printf("Tree pointer is now %p, %p\n", root, root->next);
 
+
     if(SearchTree(root, "Third Level"))
     {
         printf("Search Succeded\n");
@@ -80,6 +81,17 @@ int main(void){
     PrintTree(root, PRINT_ALL_TREE);
     assert(SiblingCount(root)   == 0);
     assert(TotalSize(root) == 11);
+    if(FindById(root, 4) != NULL){
+	printf("locate by ID worked...\n");
+    }else{
+	printf("locate by ID failed...\n");
+    }
+
+    if(FindById(root, 40) == NULL){
+	printf("locate by ID worked (not_found)...\n");
+    }else{
+	printf("locate by ID failed..(found when unexpected).\n");
+    }
     printf("all done... Tests all pass!\n");
 
     return 0; 
