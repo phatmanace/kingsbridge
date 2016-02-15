@@ -92,29 +92,41 @@ int main(void){
     }else{
 	printf("locate by ID failed..(found when unexpected).\n");
     }
-    char* _foo = "Hello There, I am a really really really long string";;
+    char* _foo = "It is unbelievable how invasive Adobe software is. I try very, very hard to avoid installing anything by Adobe, because I know that the software will do whatever it wants on my drive, install itself all over the place, install various (ugly) menubar items which are non-removable, run things at login, make a Creative Cloud Files on my Desktop (!), make me a member of the Community, demand my password to get administrative privileges, without explaining what for, make lots of network connections to various servers, sending unknown information about me, run various processes in the background (AAM Updates Notifier, anyone?) and run various updaters with annoying popups whenever it feels like it. I think CC will also pester you with upselling popups, or new features information. \n Back when Flash was still a thing, they got so low as to try to sneak in more of their products when I just wanted to update Flash.\n  It's crappy behavior and should be called out for being what it is. We are too quiet about it and we got so used to taking crap from software producers that many people don't even complain.";
     
     int y = 0;
     int y_old = 0;
-    int span = 20;
+    int span = 50;
     int lastspace = 0;
 
-		    printf("                                  __________________________\n");
+    printf("                                  __________________________\n");
     while(y < strlen(_foo) - span){
+
 	    if(y == 0){
-		    printf("all done... Tests all pass! (%d) '|%20.20s'\n",lastspace ,  _foo + y);
+		    printf("all done... Tests all pass! (%4d) |%.*s\n",lastspace , span,  _foo + y);
 	    }else{ 
-		    printf("                            (%d) '|%20.20s'\n",lastspace ,  _foo + y);
+		    printf("                            (%4d) |%.*s\n",lastspace , span,  _foo + y);
 	    } 
 	    y_old = y;
 	    while(true){
+                    if(_foo[y] == '\n'){
+                            printf("                            (%4d) |%.*s\n",lastspace , span,  " ");
+                            y++;
+                            continue;
+                    }
 		   if(_foo[y] == ' '){ lastspace = y; }   
+                   if(y - y_old >= span){
+                        y = lastspace + 1;
+                        break;
+                   }
 		   y++; 
 	   }
 
 		    
     }
-		    printf("                                  __________________________\n");
+    printf("                            (%4d) |%.*s\n",lastspace , (int)( strlen(_foo) - y),  _foo + y);
+    printf("                                  __________________________\n");
+    printf(" %d => %d/%zu\n", y, span, strlen(_foo));
 
 
     return 0; 
