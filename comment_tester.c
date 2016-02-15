@@ -92,7 +92,30 @@ int main(void){
     }else{
 	printf("locate by ID failed..(found when unexpected).\n");
     }
-    printf("all done... Tests all pass!\n");
+    char* _foo = "Hello There, I am a really really really long string";;
+    
+    int y = 0;
+    int y_old = 0;
+    int span = 20;
+    int lastspace = 0;
+
+		    printf("                                  __________________________\n");
+    while(y < strlen(_foo) - span){
+	    if(y == 0){
+		    printf("all done... Tests all pass! (%d) '|%20.20s'\n",lastspace ,  _foo + y);
+	    }else{ 
+		    printf("                            (%d) '|%20.20s'\n",lastspace ,  _foo + y);
+	    } 
+	    y_old = y;
+	    while(true){
+		   if(_foo[y] == ' '){ lastspace = y; }   
+		   y++; 
+	   }
+
+		    
+    }
+		    printf("                                  __________________________\n");
+
 
     return 0; 
 }

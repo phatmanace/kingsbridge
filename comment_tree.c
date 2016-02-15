@@ -171,11 +171,11 @@ void PrintTreeItem(const comment_item_tree* node, int offset, int *counter,  nod
 		                                                );
 		 */
 		if (method == PRINT_ALL_TREE || isExpanded(tmp)) {
-			printf("[%d - %5d] %s %d (i=%d) F/%d) -> %20s (CC_nr=%d, CC_R=%d, T=%d)\n"
+			printf("[%d - %5d] %s %d (i=%d) F/%d) -> %15s (CC_nr=%d, CC_R=%d, T=%d)\n"
 			       , offset
 			       , *counter
 			       , prefix
-			       , isExpanded(tmp)
+			       , TotalSize(tmp)
 			       , tmp->id
 			       , tmp->flags
 			       , tmp->text
@@ -286,7 +286,7 @@ int ChildCount(const comment_item_tree* node, bool recurse)
 	while (tmp != NULL) {
 		i++;
 		if(tmp->children != NULL && recurse == true){
-			i += ChildCount(tmp->children, true);
+			i += TotalSize(tmp->children);
 		}
 		tmp = tmp->next;
 	}
