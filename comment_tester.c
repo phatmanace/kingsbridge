@@ -94,39 +94,47 @@ int main(void){
     }
     char* _foo = "It is unbelievable how invasive Adobe software is. I try very, very hard to avoid installing anything by Adobe, because I know that the software will do whatever it wants on my drive, install itself all over the place, install various (ugly) menubar items which are non-removable, run things at login, make a Creative Cloud Files on my Desktop (!), make me a member of the Community, demand my password to get administrative privileges, without explaining what for, make lots of network connections to various servers, sending unknown information about me, run various processes in the background (AAM Updates Notifier, anyone?) and run various updaters with annoying popups whenever it feels like it. I think CC will also pester you with upselling popups, or new features information. \n Back when Flash was still a thing, they got so low as to try to sneak in more of their products when I just wanted to update Flash.\n  It's crappy behavior and should be called out for being what it is. We are too quiet about it and we got so used to taking crap from software producers that many people don't even complain.";
     
-    int y = 0;
-    int y_old = 0;
+    int start = 0;
+    int stop = 0;
+    bool had_newline = false;
     int span = 50;
     int lastspace = 0;
 
     printf("                                  __________________________\n");
-    while(y < strlen(_foo) - span){
+    while(start < strlen(_foo) - span){
 
-	    if(y == 0){
-		    printf("all done... Tests all pass! (%4d) |%.*s\n",lastspace , span,  _foo + y);
+	    if(start == 0){
+		    /* Treat the case of the first line...*/
+		    printf("all done... Tests all pass! (%4d) |%.*s\n",lastspace , span,  _foo + start);
 	    }else{ 
-		    printf("                            (%4d) |%.*s\n",lastspace , span,  _foo + y);
+		    /* Every other line */
+		    printf("                            (%4d) |%.*s\n",lastspace , (stop - start),  _foo + start);
 	    } 
-	    y_old = y;
+	    stop = start;
 	    while(true){
-                    if(_foo[y] == '\n'){
+                    if(_foo[start] == '\n'){
+			    had_newline = true;
                             printf("                            (%4d) |%.*s\n",lastspace , span,  " ");
-                            y++;
+                            start++;
                             continue;
                     }
-		   if(_foo[y] == ' '){ lastspace = y; }   
-                   if(y - y_old >= span){
-                        y = lastspace + 1;
+		    /*Save position of Last space*/
+		   if(_foo[start] == ' '){ lastspace = start; }   
+		   /*
+		    * If we run over our span... go back to last space position;
+		    */
+                   if(start - stop >= span){
+                        start = lastspace + 1;
                         break;
                    }
-		   y++; 
+		   start++; 
 	   }
 
 		    
     }
-    printf("                            (%4d) |%.*s\n",lastspace , (int)( strlen(_foo) - y),  _foo + y);
+    printf("                            (%4d) |%.*s\n",lastspace , (int)( strlen(_foo) - start),  _foo + start);
     printf("                                  __________________________\n");
-    printf(" %d => %d/%zu\n", y, span, strlen(_foo));
+    printf(" %d => %d/%zu\n", start, span, strlen(_foo));
 
 
     return 0; 
