@@ -30,6 +30,7 @@ int  PrintTree(comment_item_tree* node, node_method print_method);
 bool isExpanded(comment_item_tree* node);
 bool SearchTree(comment_item_tree* node, char* searchString);
 void SetExpansionState(comment_item_tree* node, bool expanded);
+int  TreeMaxDepth(const comment_item_tree* node);
 
 #define NODE_EXPANDED 1
 #define NODE_LOCATED  2

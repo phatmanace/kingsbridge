@@ -166,6 +166,7 @@ int main(void)
 	printf("                      LL=>  (%4d) |%.*s\n", lastspace, (int)( strlen(_foo) - start),  _foo + start);
 	printf("                                  __________________________\n");
 	printf(" %d => %d/%zu\n", start, span, strlen(_foo));
+	printf("Tree Depth %d \n", TreeMaxDepth(root));
 
 
 	return 0;

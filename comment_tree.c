@@ -270,6 +270,48 @@ comment_item_tree* FindById(comment_item_tree* node, int id)
 	return NULL;
 }
 
+int _TreeMaxDepth(const comment_item_tree* node, int depth)
+{
+		if(node == NULL){
+			return 0;
+		}
+		if(node->children == NULL){
+			return depth;
+		}
+		int soFar = 0;
+		comment_item_tree* tmp = (comment_item_tree*)node->children;
+		while(tmp != NULL){
+				
+			int this_run = _TreeMaxDepth(tmp, depth + 1);
+			if(this_run > soFar){
+				soFar = this_run;
+			}
+			
+			tmp = tmp->next;
+		}
+		return soFar;
+}
+
+int TreeMaxDepth(const comment_item_tree* node)
+{
+	if(node == NULL){
+		return 0;
+	}
+
+	int soFar = 1;
+	comment_item_tree* tmp = (comment_item_tree*)node;
+	while(tmp != NULL){
+			
+		int this_run = _TreeMaxDepth(tmp, 1);
+		if(this_run > soFar){
+			soFar = this_run;
+		}
+		
+		tmp = tmp->next;
+	}
+	return soFar;
+}
+
 int TotalNodeCount(const comment_item_tree* node)
 {
 	if (node == NULL)
