@@ -6,6 +6,7 @@
 #include <string.h>
 #include "ncurses.h"
 #include <unistd.h>
+#include "t_sample.h"
 
 #define max(a, b) (a > b ? a : b)
 
@@ -32,29 +33,9 @@ int main(void)
 		token = strtok(NULL, ".");
 	}
 	printf("Starting comment tree handling test\n");
-	int i = 0;
-	comment_item_tree* root = newCommentTreeNodeWithText("_ROOT", i++);
-	comment_item_tree* tree = newCommentTreeNodeWithText("Lev1-Initial", i++);
-	AppendChild(root, tree);
-	printf("comments in initial node are %s\n", tree->text);
-	dump(tree, "initial state");
-	assert(SiblingCount(tree)   == 0);
-	assert(TotalNodeCount(tree) == 1);
-	printf("Before append, %p, %p\n", tree, tree->next);
-	printf("Appending item: %d\n", AppendItem(tree, newCommentTreeNodeWithText("Lev1-first", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-1", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-2", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-3", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-4", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-5", i++)));
-	printf("Appending CHILD item: %d\n", AppendChild(tree->children->next, newCommentTreeNodeWithText("Third Level", i++)));
-	printf("Appending item: %d\n", AppendItem(tree, newCommentTreeNodeWithText("Lev2-Second", i++)));
-	printf("Appending item: %d\n", AppendItem(tree, newCommentTreeNodeWithText("Lev2-Third", i++)));
-	printf("After append, %p, %p\n", tree, tree->next);
-	dump(tree, "after_append");
-	PrintTree(root, PRINT_ALL_TREE);
-	printf("Tree pointer is now %p, %p\n", root, root->next);
+	
 
+	comment_item_tree* root = make_sample_tree();
 
 	if (SearchTree(root, "Third Level")) {
 		printf("Search Succeded\n");
