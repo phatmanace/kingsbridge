@@ -7,10 +7,10 @@ zlog_category_t *c;
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 
 
-void RenderRow(WINDOW* win, comment_item_tree* node)
+void RenderRow(WINDOW* win, comment_item_tree* node, int row, int column)
 {
     
-            wmove(win, row++, txcol); wprintw(win, node->text);
+            wmove(win, row++, column); wprintw(win, node->text);
 }
 
 void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
@@ -21,7 +21,7 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
         int row = 4;
         int txcol = 7;
         while(tmp != NULL){
-            RenderRow(win, tmp); 
+            RenderRow(win, tmp, row, txcol); 
             tmp = tmp->next;
 
         }
