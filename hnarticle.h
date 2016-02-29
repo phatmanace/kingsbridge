@@ -1,5 +1,5 @@
 
-struct article{
+struct article {
 	char *link;
 	char *text;
 	char *storyhash;
@@ -10,9 +10,9 @@ struct article{
 	struct article *previous;
 };
 
-typedef enum {RESULT_OK, RESULT_FAILED} result;
+typedef enum { RESULT_OK, RESULT_FAILED } result;
 
-struct FetchResult{
-    struct article* articles;
-    result curl_result;
+struct FetchResult {
+	struct article* articles;
+	result curl_result;
 };

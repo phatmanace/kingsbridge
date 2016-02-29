@@ -9,10 +9,10 @@ extern "C" {
 
 /**
  * JSON type identifier. Basic types are:
- * 	o Object
- * 	o Array
- * 	o String
- * 	o Other primitive: number, boolean (true/false) or null
+ *      o Object
+ *      o Array
+ *      o String
+ *      o Other primitive: number, boolean (true/false) or null
  */
 typedef enum {
 	JSMN_PRIMITIVE = 0,
@@ -51,9 +51,9 @@ typedef struct {
  * the string being parsed now and current position in that string
  */
 typedef struct {
-	unsigned int pos; /* offset in the JSON string */
-	unsigned int toknext; /* next token to allocate */
-	int toksuper; /* superior token node, e.g parent object or array */
+	unsigned int pos;       /* offset in the JSON string */
+	unsigned int toknext;   /* next token to allocate */
+	int toksuper;           /* superior token node, e.g parent object or array */
 } jsmn_parser;
 
 /**
@@ -66,7 +66,7 @@ void jsmn_init(jsmn_parser *parser);
  * a single JSON object.
  */
 jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
-		jsmntok_t *tokens, unsigned int num_tokens);
+		     jsmntok_t *tokens, unsigned int num_tokens);
 
 #ifdef __cplusplus
 }

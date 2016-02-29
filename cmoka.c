@@ -10,34 +10,35 @@ zlog_category_t *c;
 
 int main(void)
 {
-    printf("Checking..\n");
-    int l_init = 0;
-    l_init = zlog_init("/etc/zlog.conf");
-    c = zlog_get_category("hngui");
-    if (!c) {
-        printf("zlog_initialization failure\n");
-        zlog_fini();
-        return -2;
-    }
-    if(l_init) {
-        printf("logging init failed");
-        return -1;
-    }
-    printf("logging..\n");
-    struct FetchResult *result = malloc(sizeof(struct FetchResult));
-    result->articles = NULL;
-    FetchArticles(result);
-    printf("Dumping....\n");
-    DumpArticles(result->articles);
-    ArticleGet(result->articles, 4)->flags |= (1<<5);
-    zlog_info(c, "----Set Flag on 4th element...-----------------");
-    DumpArticles(result->articles);
-    zlog_info(c, "----fetching articles again....----------------");
-    FetchArticles(result);
-    DumpArticles(result->articles);
-    return 1;
+	printf("Checking..\n");
+	int l_init = 0;
+	l_init = zlog_init("/etc/zlog.conf");
+	c = zlog_get_category("hngui");
+	if (!c) {
+		printf("zlog_initialization failure\n");
+		zlog_fini();
+		return -2;
+	}
+	if (l_init) {
+		printf("logging init failed");
+		return -1;
+	}
+	printf("logging..\n");
+	struct FetchResult *result = malloc(sizeof(struct FetchResult));
+	result->articles = NULL;
+	FetchArticles(result);
+	printf("Dumping....\n");
+	DumpArticles(result->articles);
+	ArticleGet(result->articles, 4)->flags |= (1 << 5);
+	zlog_info(c, "----Set Flag on 4th element...-----------------");
+	DumpArticles(result->articles);
+	zlog_info(c, "----fetching articles again....----------------");
+	FetchArticles(result);
+	DumpArticles(result->articles);
+	return 1;
 }
-void foo(){
+void foo()
+{
 /*
     //FetchArticles(&list);
     zlog_info(c, "Current head node is %p", list);
@@ -80,5 +81,5 @@ void foo(){
         printf("***********************error... something bad happened******************\n");
     }
 
-    */
+ */
 }

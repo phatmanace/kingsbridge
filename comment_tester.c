@@ -19,6 +19,7 @@ void dump(comment_item_tree *tree, const char* title)
 	printf("     Total Size(Resursive)      %d\n", TotalSize(tree));
 	printf("     Child Count                %d\n", ChildCount(tree, false));
 	printf("     Total Size At this level:  %d\n", Size(tree));
+	printf("     Visible Size At this level:  %d\n", VisibleSize(tree));
 	printf("===============---==================\n");
 }
 
@@ -33,7 +34,7 @@ int main(void)
 		token = strtok(NULL, ".");
 	}
 	printf("Starting comment tree handling test\n");
-	
+
 
 	comment_item_tree* root = make_sample_tree();
 
@@ -45,7 +46,7 @@ int main(void)
 	PrintTree(root, PRINT_ALL_TREE);
 	printf("----------------printing only the subtre------------------\n");
 	PrintTree(root, PRINT_ONLY_EXPANDED_NODES);
-	SetExpansionState(root, FALSE);
+	SetSingleExpansionState(root, FALSE);
 	if (SearchTree(root, "Lev2-Second")) {
 		printf("Search Succeded\n");
 	}else{
@@ -56,16 +57,41 @@ int main(void)
 	printf("----------------printing only the subtre------------------\n");
 	PrintTree(root, PRINT_ONLY_EXPANDED_NODES);
 	printf("----------------set expansion state to true---------------\n");
-	SetExpansionState(root, TRUE);
+	SetSingleExpansionState(root, TRUE);
 	PrintTree(root, PRINT_ALL_TREE);
 	printf("----------------set expansion state to false--------------\n");
-	SetExpansionState(root, FALSE);
+	SetSingleExpansionState(root, FALSE);
 	dump(root, "After Everything");
+	SetSingleExpansionState(root, TRUE);
+	dump(root, "After Expanding root");
 	int sizeTotal = TotalSize(root);
 	printf("Total size is %d\n", sizeTotal);
 	PrintTree(root, PRINT_ALL_TREE);
-	assert(SiblingCount(root)   == 0);
-	assert(TotalSize(root) == 11);
+	printf("---------------------------------------\n");
+	PrintTree(root, PRINT_ONLY_EXPANDED_NODES);
+	//assert(SiblingCount(root)   == 0);
+	//assert(TotalSize(root) == 11);
+
+	printf("Extracting to flat tree\n");
+	int sz = -1;
+	comment_item_tree** _flat = ToFlatTree(root, &sz);
+        
+	printf("Extracted to flat tree - sz was %d and tree was %p\n", sz, _flat);
+        int y = 0;
+        for(y = 0;y < sz;y++){
+            printf("node @ %d  is %*s\n", y, 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text);
+        }
+	SetExpansionState(root, FALSE);
+	SetExpansionState(root, TRUE);
+        free(_flat);
+	 _flat = ToFlatTree(root, &sz);
+        
+	printf("Extracted to full flat tree - sz was %d and tree was %p\n", sz, _flat);
+        for(y = 0;y < sz;y++){
+            printf("node @ %d  is %*s\n", y, 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text);
+        }
+
+	return 0;
 	if (FindById(root, 4) != NULL) {
 		printf("locate by ID worked...\n");
 	}else{
@@ -105,23 +131,23 @@ int main(void)
 				break;
 			}
 		}
-                /*
-		printf("----                        (NL%d)(LS%4d)(ST%4d)(SP%4d)|%.*s\n",
+		/*
+		   printf("----                        (NL%d)(LS%4d)(ST%4d)(SP%4d)|%.*s\n",
 		       had_newline,
 		       lastspace,
 		       start,
 		       stop,
 		       (stop - start),
 		       _foo + start);
-                */
+		 */
 		if (had_newline == false) {
 			stop = lastspace + 1;
 		}
-                if(had_newline == true){
-                    while(_foo[start] == ' '){
-                        start++;
-                    }
-                }
+		if (had_newline == true) {
+			while (_foo[start] == ' ') {
+				start++;
+			}
+		}
 		printf("                            (NL%d)(LS%4d)(ST%4d)(SP%4d)|%.*s\n",
 		       had_newline,
 		       lastspace,
@@ -140,8 +166,6 @@ int main(void)
 		had_newline = false;
 		stop++;
 		usleep(200 * 1000);
-
-
 
 	}
 	printf("                      LL=>  (%4d) |%.*s\n", lastspace, (int)( strlen(_foo) - start),  _foo + start);

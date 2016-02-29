@@ -6,7 +6,7 @@ int init_articles(struct article *head);
 int  ArticleSize(struct article *head);
 
 void DumpArticles(struct article *head);
-void xDumpArticles(char *prefix,struct article *head);
+void xDumpArticles(char *prefix, struct article *head);
 
 struct article* ArticleGet(struct article *head, int index);
 

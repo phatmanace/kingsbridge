@@ -55,8 +55,8 @@ nxn * SortList(nxn *pList)
 /*   of only using < and not <=                      */
 nxn * MergeLists(nxn *pSrc1, nxn *pSrc2)
 {
-	nxn *pDst = NULL;      /* destination head ptr */
-	nxn **ppDst = &pDst;   /* ptr to head or prev->next */
+	nxn *pDst = NULL;       /* destination head ptr */
+	nxn **ppDst = &pDst;    /* ptr to head or prev->next */
 
 	if (pSrc1 == NULL)
 		return pSrc2;
@@ -242,9 +242,9 @@ int main(void)
 	}
 
 	PrintTree(node);
-        //	SortTree(&node);
-        nxn* l = SortList(node);
-        
+	//	SortTree(&node);
+	nxn* l = SortList(node);
+
 	printf("Sorted out.. \n");
 	PrintTree(l);
 

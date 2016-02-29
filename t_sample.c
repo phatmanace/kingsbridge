@@ -10,18 +10,23 @@
 comment_item_tree* make_sample_tree()
 {
 	int i = 0;
-	comment_item_tree* root = newCommentTreeNodeWithText("_ROOT", i++);
-	comment_item_tree* tree = newCommentTreeNodeWithText("Lev1-Initial", i++);
-	AppendChild(root, tree);
-	AppendItem(tree, newCommentTreeNodeWithText("Lev1-first", i++));
-	AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-1", i++));
-	AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-2", i++));
-	AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-3", i++));
-	AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-4", i++));
-	AppendChild(tree, newCommentTreeNodeWithText("Level2-cc-5", i++));
-	AppendChild(tree->children->next, newCommentTreeNodeWithText("Third Level", i++));
-	AppendItem(tree, newCommentTreeNodeWithText("Lev2-Second", i++));
-	AppendItem(tree, newCommentTreeNodeWithText("Lev2-Third", i++));
+	comment_item_tree* root = newCommentTreeNodeWithText("ROOT_OF_TREE", i++);
+	comment_item_tree* lev1 = newCommentTreeNodeWithText("Lev1-ROOT", i++);
+
+	SetSingleExpansionState(root, true);
+	SetSingleExpansionState(lev1, true);
+	AppendChild(root, lev1);
+	AppendItem(lev1, newCommentTreeNodeWithText("1st - one", i++));
+	AppendChild(lev1, newCommentTreeNodeWithText("1st-1", i++));
+	AppendChild(lev1, newCommentTreeNodeWithText("1st-2", i++));
+	AppendChild(lev1, newCommentTreeNodeWithText("1st-3", i++));
+	AppendChild(lev1, newCommentTreeNodeWithText("1st-4", i++));
+	AppendChild(lev1, newCommentTreeNodeWithText("1st-5", i++));
+	AppendChild(lev1->children->next, newCommentTreeNodeWithText("2nd Level-1", i++));
+	AppendChild(lev1->children->next, newCommentTreeNodeWithText("2nd Level-2", i++));
+	AppendChild(lev1->children->next, newCommentTreeNodeWithText("2nd Level-3", i++));
+	AppendItem(lev1, newCommentTreeNodeWithText("1st-6", i++));
+	AppendItem(lev1, newCommentTreeNodeWithText("1st-7", i++));
 
 	return root;
 }
