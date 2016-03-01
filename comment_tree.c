@@ -5,13 +5,13 @@
 #include <string.h>
 #include "zlog.h"
 
-void LogPrintTreeItem(zlog_category_t* c, const comment_item_tree* node, int offset, int *counter,  node_method method);
+void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *counter,  node_method method);
 /*
  * Create new comment node with nothing
  */
-comment_item_tree* newCommentTreeNode(int id)
+ND* newCommentTreeNode(int id)
 {
-	comment_item_tree* item = malloc(sizeof(comment_item_tree));
+	ND* item = malloc(sizeof(ND));
 
 	item->children = NULL;
 	item->next     = NULL;
@@ -24,30 +24,21 @@ comment_item_tree* newCommentTreeNode(int id)
 	return item;
 }
 
-comment_item_tree* newCommentTreeNodeWithText(char* text, int id)
+ND* newCommentTreeNodeWithText(char* text, int id)
 {
-	printf("copying %s\n", text);
-	comment_item_tree* item = malloc(sizeof(comment_item_tree));
-	item->children   = NULL;
-	item->next       = NULL;
-	item->previous   = NULL;
-	item->parent     = NULL;
+	ND* item = newCommentTreeNode(id);
 	item->text       = malloc(strlen(text));
-	item->flags      = 0;
-	item->id         = id;
-	item->_ft_depth = 0;
-	SetSingleExpansionState(item, false);
 	strcpy(item->text, text);
 	return item;
 }
 
 
-bool isExpanded(comment_item_tree* node)
+bool isExpanded(ND* node)
 {
 	return (node->flags >> NODE_EXPANDED) & 1;
 }
 
-void MarkParentsExpanded(comment_item_tree* node)
+void MarkParentsExpanded(ND* node)
 {
 	if (node == NULL)
 		return;
@@ -56,7 +47,7 @@ void MarkParentsExpanded(comment_item_tree* node)
 		MarkParentsExpanded(node->parent);
 }
 
-void SetSingleExpansionState(comment_item_tree* node, bool expanded)
+void SetSingleExpansionState(ND* node, bool expanded)
 {
 	if (expanded) {
 		node->flags |= 1 << NODE_EXPANDED;
@@ -65,7 +56,7 @@ void SetSingleExpansionState(comment_item_tree* node, bool expanded)
 	}
 }
 
-void SetExpansionState(comment_item_tree* node, bool expanded)
+void SetExpansionState(ND* node, bool expanded)
 {
 	if (expanded)
 		node->flags |= 1 << NODE_EXPANDED;
@@ -77,7 +68,7 @@ void SetExpansionState(comment_item_tree* node, bool expanded)
 		SetExpansionState(node->children, expanded);
 }
 
-void TreeFree(comment_item_tree* node)
+void TreeFree(ND* node)
 {
 	if (node == NULL)
 		return;
@@ -85,7 +76,7 @@ void TreeFree(comment_item_tree* node)
 	free(node);
 
 }
-bool SearchTree(comment_item_tree* node, char* searchString)
+bool SearchTree(ND* node, char* searchString)
 {
 	int this_result = 0;
 
@@ -105,19 +96,31 @@ bool SearchTree(comment_item_tree* node, char* searchString)
 	return this_result > 0;
 }
 
-int AppendItem(comment_item_tree* node, comment_item_tree* newNode)
+int ComputedDepth(ND* node){
+	
+	int d = 0;
+	ND* tmp = node;
+	while(tmp->parent != NULL){
+		d++;
+		tmp = tmp->parent;
+	}
+	return d;
+}
+
+int AppendItem(ND* node, ND* newNode)
 {
 	if (node == NULL)
 		return -1;
-	comment_item_tree* tmp = node;
+	ND* tmp = node;
 	while (tmp->next != NULL)
 		tmp = tmp->next;
 	tmp->next = newNode;
 	newNode->previous = tmp;
+	newNode->parent = tmp->parent;
 	return 0;
 }
 
-comment_item_tree* GetNextTreeElement(comment_item_tree* node)
+ND* GetNextTreeElement(ND* node)
 {
 	if (node == NULL) {
 		return NULL;
@@ -131,12 +134,12 @@ comment_item_tree* GetNextTreeElement(comment_item_tree* node)
 	return NULL;
 
 }
-int AppendChild(comment_item_tree* node, comment_item_tree* newNode)
+int AppendChild(ND* node, ND* newNode)
 {
 	if (node == NULL)
 		return -1;
 	if (node->children != NULL) {
-		comment_item_tree* tmp = node->children;
+		ND* tmp = node->children;
 		while (tmp->next != NULL)
 			tmp = tmp->next;
 		tmp->next = newNode;
@@ -149,11 +152,11 @@ int AppendChild(comment_item_tree* node, comment_item_tree* newNode)
 	return 0;
 }
 
-void LogPrintTreeItem(zlog_category_t* c, const comment_item_tree* node, int offset, int *counter,  node_method method)
+void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *counter,  node_method method)
 {
 	int newoffset = offset + 1;
 	int i = 0;
-	comment_item_tree* tmp = (comment_item_tree*)node;
+	ND* tmp = (ND*)node;
 
 	if (tmp == NULL)
 		return;
@@ -213,7 +216,7 @@ void LogPrintTreeItem(zlog_category_t* c, const comment_item_tree* node, int off
 
 }
 
-int LogPrintTree(zlog_category_t* c, comment_item_tree* node, node_method method)
+int LogPrintTree(zlog_category_t* c, ND* node, node_method method)
 {
 	if (node == NULL) {
 		printf("Whole tree was null");
@@ -225,11 +228,11 @@ int LogPrintTree(zlog_category_t* c, comment_item_tree* node, node_method method
 	zlog_info(c, "________________________________________________");
 	return 0;
 }
-void PrintTreeItem(const comment_item_tree* node, int offset, int *counter,  node_method method)
+void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method)
 {
 	int newoffset = offset + 1;
 	int i = 0;
-	comment_item_tree* tmp = (comment_item_tree*)node;
+	ND* tmp = (ND*)node;
 
 	if (tmp == NULL)
 		return;
@@ -301,7 +304,7 @@ void PrintTreeItem(const comment_item_tree* node, int offset, int *counter,  nod
 
 }
 
-int PrintTree(comment_item_tree* node, node_method method)
+int PrintTree(ND* node, node_method method)
 {
 	if (node == NULL) {
 		printf("Whole tree was null");
@@ -314,17 +317,17 @@ int PrintTree(comment_item_tree* node, node_method method)
 
 
 
-int SiblingCount(const comment_item_tree* node)
+int SiblingCount(const ND* node)
 {
 	if (node == NULL)
 		return 0;
 	return Size(node->next);
 }
 
-int Size(comment_item_tree* node)
+int Size(ND* node)
 {
 	int i = 0;
-	comment_item_tree* tmp = node;
+	ND* tmp = node;
 
 	if (tmp == NULL)
 		return 0;
@@ -335,10 +338,10 @@ int Size(comment_item_tree* node)
 	return i;
 }
 
-int VisibleSize(comment_item_tree* node)
+int VisibleSize(ND* node)
 {
 	int i = 0;
-	comment_item_tree* tmp = node;
+	ND* tmp = node;
 
 	if (tmp == NULL) {
 		return 0;
@@ -353,22 +356,22 @@ int VisibleSize(comment_item_tree* node)
 	return i;
 }
 
-void _flatTreeInternal(comment_item_tree **ray, comment_item_tree *node, int* rayindex, int depth){
+void _flatTreeInternal(ND **ray, ND *node, int* rayindex, int depth){
        // ray[0] = 
         if(node == NULL){
             return;
         }
-        printf("           Depth=%d, Adding  %s at index %d\n", depth,  node->text, *rayindex);
+        //printf("           Depth=%d, Adding  %s at index %d\n", depth,  node->text, *rayindex);
         node->_ft_depth = depth;
         ray[*rayindex] = (node);
                 (*rayindex)++;
 
         if(*rayindex > 1000){
-            printf("Error... exiting..\n");
+            //printf("Error... exiting..\n");
             return;
         }
 
-        comment_item_tree* tmp = node;
+        ND* tmp = node;
                 if(tmp->children != NULL && isExpanded(tmp)){
                     //printf("going into children at %s\n", tmp->text);
                     _flatTreeInternal(ray, tmp->children, rayindex, depth + 1);
@@ -378,7 +381,7 @@ void _flatTreeInternal(comment_item_tree **ray, comment_item_tree *node, int* ra
                 _flatTreeInternal(ray, tmp, rayindex , depth);
 
 }
-comment_item_tree **ToFlatTree(comment_item_tree *node, int* n)
+ND **ToFlatTree(ND *node, int* n)
 {
 
 	int _sz = VisibleSize(node);
@@ -389,15 +392,15 @@ comment_item_tree **ToFlatTree(comment_item_tree *node, int* n)
 	}
         int _counter = 0;
         
-	comment_item_tree** ray = malloc(sizeof(comment_item_tree) *  _sz );
+	ND** ray = malloc(sizeof(ND) *  _sz );
         _flatTreeInternal(ray, node, &_counter, 0);
 	return ray;
 }
 
-int TotalSize(comment_item_tree* node)
+int TotalSize(ND* node)
 {
 	int i = 0;
-	comment_item_tree* tmp = node;
+	ND* tmp = node;
 
 	if (tmp == NULL) {
 		return 0;
@@ -412,9 +415,9 @@ int TotalSize(comment_item_tree* node)
 	return i;
 }
 
-comment_item_tree* FindById(comment_item_tree* node, int id)
+ND* FindById(ND* node, int id)
 {
-	comment_item_tree* tmp = node;
+	ND* tmp = node;
 
 	if (tmp == NULL) {
 		return 0;
@@ -424,7 +427,7 @@ comment_item_tree* FindById(comment_item_tree* node, int id)
 			return tmp;
 		}
 		if (tmp->children != NULL ) {
-			comment_item_tree* child = NULL;
+			ND* child = NULL;
 			child = FindById(tmp->children, id);
 			if (child != NULL) {
 				return child;
@@ -435,7 +438,7 @@ comment_item_tree* FindById(comment_item_tree* node, int id)
 	return NULL;
 }
 
-int _TreeMaxDepth(const comment_item_tree* node, int depth)
+int _TreeMaxDepth(const ND* node, int depth)
 {
 	if (node == NULL) {
 		return 0;
@@ -444,7 +447,7 @@ int _TreeMaxDepth(const comment_item_tree* node, int depth)
 		return depth;
 	}
 	int soFar = 0;
-	comment_item_tree* tmp = (comment_item_tree*)node->children;
+	ND* tmp = (ND*)node->children;
 	while (tmp != NULL) {
 
 		int this_run = _TreeMaxDepth(tmp, depth + 1);
@@ -457,14 +460,14 @@ int _TreeMaxDepth(const comment_item_tree* node, int depth)
 	return soFar;
 }
 
-int TreeMaxDepth(const comment_item_tree* node)
+int TreeMaxDepth(const ND* node)
 {
 	if (node == NULL) {
 		return 0;
 	}
 
 	int soFar = 1;
-	comment_item_tree* tmp = (comment_item_tree*)node;
+	ND* tmp = (ND*)node;
 	while (tmp != NULL) {
 
 		int this_run = _TreeMaxDepth(tmp, 1);
@@ -477,19 +480,19 @@ int TreeMaxDepth(const comment_item_tree* node)
 	return soFar;
 }
 
-int TotalNodeCount(const comment_item_tree* node)
+int TotalNodeCount(const ND* node)
 {
 	if (node == NULL)
 		return 0;
 	return 1 +  SiblingCount(node) + ChildCount(node, true);
 }
 
-int ChildCount(const comment_item_tree* node, bool recurse)
+int ChildCount(const ND* node, bool recurse)
 {
 	if (node == NULL || node->children == NULL)
 		return 0;
 	int i = 0;
-	const comment_item_tree* tmp = node->children;
+	const ND* tmp = node->children;
 	while (tmp != NULL) {
 		i++;
 		if (tmp->children != NULL && recurse == true) {
