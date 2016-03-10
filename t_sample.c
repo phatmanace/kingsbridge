@@ -21,6 +21,15 @@ comment_item_tree* make_sample_tree()
 	AppendChild(lev1, newCommentTreeNodeWithText("1st-2", i++));
 	AppendChild(lev1, newCommentTreeNodeWithText("1st-3", i++));
 	AppendChild(lev1, newCommentTreeNodeWithText("1st-4", i++));
+	int y = 0;
+	for(y = 0;y < 100;y++){
+		char* tx = malloc(16);
+		sprintf(tx, "xx-%3d", y);
+		tx[7] = '\0';
+
+		AppendChild(lev1, newCommentTreeNodeWithText(tx, i++));
+		free(tx);	
+	}
 	AppendChild(lev1, newCommentTreeNodeWithText("1st-5", i++));
 	AppendChild(lev1->children->next, newCommentTreeNodeWithText("2nd Level-1", i++));
 	AppendChild(lev1->children->next, newCommentTreeNodeWithText("2nd Level-2", i++));

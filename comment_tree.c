@@ -76,22 +76,40 @@ void TreeFree(ND* node)
 	free(node);
 
 }
-bool SearchTree(ND* node, char* searchString)
+ND* SearchTree(const ND* node, char* searchString)
+{
+	ND* found = NULL;
+
+	if (node == NULL){
+		return (ND*)found;
+	}
+
+	if (strcmp(node->text, searchString) == 0) {
+		return (ND*)node;
+	}
+	if ((found = SearchTree(node->next, searchString)) != NULL){
+		return found;
+	}
+	if ((found = SearchTree(node->children, searchString)) != NULL){
+		return found;
+ 	}		
+	return found;
+}
+
+bool TreeExists(ND* node, char* searchString)
 {
 	int this_result = 0;
 
-	if (node == NULL)
+	if (node == NULL){
 		return 1 == 0;
-	node->flags &= ~(1 << NODE_LOCATED);
-
+	}
 	if (strcmp(node->text, searchString) == 0) {
 		this_result++;
 		node->flags |= 1 << NODE_LOCATED;
-		MarkParentsExpanded(node);
 	}
-	if (SearchTree(node->next, searchString))
+	if (TreeExists(node->next, searchString))
 		this_result++;
-	if (SearchTree(node->children, searchString))
+	if (TreeExists(node->children, searchString))
 		this_result++;
 	return this_result > 0;
 }

@@ -77,7 +77,7 @@ int main(void)
 	comment_item_tree** _flat = ToFlatTree(root, &sz);
         
 	printf("Extracted to flat tree - sz was %d and tree was %p\n", sz, _flat);
-	  int PRINT_WIDTH=20;
+	int PRINT_WIDTH=20;
         int y = 0;
         printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
         for(y = 0;y < sz;y++){
@@ -86,7 +86,7 @@ int main(void)
 	SetExpansionState(root, FALSE);
 	SetExpansionState(root, TRUE);
         free(_flat);
-	 _flat = ToFlatTree(root, &sz);
+	_flat = ToFlatTree(root, &sz);
         
 	printf("Extracted to full flat tree - sz was %d and tree was %p\n", sz, _flat);
             printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
