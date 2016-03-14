@@ -15,10 +15,12 @@ all:
 	${CC} -g -o string_utils.o  -c string_utils.c  -Wall 
 	${CC} -g -o bin/ll_sort_test    ll_sort_test.c  -Wall
 	${CC} -g -o comment_tree.o  -c comment_tree.c ${INC} ${LIB}  -Wall -lzlog
+	${CC} -g -o queue.o  -c queue.c ${INC} ${LIB}  -Wall -lzlog
+	${CC} -g -o comment_fetch.o     -c comment_fetch.c      -lcurl -lconfig -lyajl -Wall
 	${CC} -g -o t_sample.o      -c t_sample.c   ${INC} ${LIB}    -Wall
 	${CC} -g -o bin/comment_test    comment_tester.c  t_sample.o comment_tree.o  ${INC} ${LIB}  -Wall -lzlog
 	${CC} -g -o bin/curses_demo     curses_sampler.c   ${INC} ${LIB}   -lncurses  -Wall -lzlog
-	${CC} -g -o bin/curses_tree     crs_tree_test.c  t_sample.o comment_tree.o ${INC} ${LIB}  -lzlog  -lncurses  -Wall
+	${CC} -g -o bin/curses_tree     crs_tree_test.c  t_sample.o comment_fetch.o  comment_tree.o ${INC} ${LIB} -lyajl -lcurl  -lzlog  -lncurses  -Wall
 	#${CC} -g -o hnfetcher.o     -c hnfetcher.c      -lcurl -lconfig -lyajl -Wall
 	#${CC} -g -o grabber        grabber.c hnfetcher.o -lcurl -lconfig -lyajl -lncurses -lzlog -lpthread -Wall
 	#${CC} -g -o demo           cmoka.c hnfetcher.o   -lcurl -lconfig -lyajl -lncurses -lzlog -lpthread -Wall
