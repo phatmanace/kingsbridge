@@ -199,7 +199,6 @@ void SortTree(nxn** head)
 	while (1) {
 		SortIterations++;
 		nxn* tmp = *head;
-		nxn* previous = NULL;
 
 		// reset swap count;
 		SwapCount = 0;
@@ -214,11 +213,9 @@ void SortTree(nxn** head)
 				SwapCount++;
 				break;
 			}
-			previous = tmp;
 			tmp = tmp->next;
 			//usleep(200 * 1000);
 		}
-		//printf("Completing  an iteration\n");
 
 		if (SwapCount == 0) {
 			break;

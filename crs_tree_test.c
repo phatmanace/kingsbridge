@@ -179,7 +179,6 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
 	int _sty = 21;
 
 
-/*
         while (_sty < 35) {
                 while (_stx < 120) {
                         //wattron(win, A_BOLD | A_BLINK);
@@ -190,7 +189,6 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
                 _sty += BOX_H;
                 _stx = 1;
         }
- */
 
 }
 

@@ -1,33 +1,26 @@
-OS := $(shell uname)
-LIBS1 = "ACE"
-ifeq ($(OS),Darwin)
-	LIBS1="OSX"
-else
-	LIBS1="Linux"
-endif
-
 INC=-I/usr/local/include -I/opt/local/include
 LIB=-L/usr/local/lib
-default: all
+COPTS=-Wall
+ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses
 
-all: 
-	echo ${LIBS1}
-	${CC} -g -o string_utils.o  -c string_utils.c  -Wall 
-	${CC} -g -o bin/ll_sort_test    ll_sort_test.c  -Wall
-	${CC} -g -o comment_tree.o  -c comment_tree.c ${INC} ${LIB}  -Wall -lzlog
-	${CC} -g -o queue.o  -c queue.c ${INC} ${LIB}  -Wall -lzlog
-	${CC} -g -o comment_fetch.o     -c comment_fetch.c      -lcurl -lconfig -lyajl -Wall
-	${CC} -g -o t_sample.o      -c t_sample.c   ${INC} ${LIB}    -Wall
-	${CC} -g -o bin/comment_test    comment_tester.c  t_sample.o comment_tree.o  ${INC} ${LIB}  -Wall -lzlog
-	${CC} -g -o bin/curses_demo     curses_sampler.c   ${INC} ${LIB}   -lncurses  -Wall -lzlog
-	${CC} -g -o bin/curses_tree     crs_tree_test.c  t_sample.o comment_fetch.o  comment_tree.o ${INC} ${LIB} -lyajl -lcurl  -lzlog  -lncurses  -Wall
-	#${CC} -g -o hnfetcher.o     -c hnfetcher.c      -lcurl -lconfig -lyajl -Wall
-	#${CC} -g -o grabber        grabber.c hnfetcher.o -lcurl -lconfig -lyajl -lncurses -lzlog -lpthread -Wall
-	#${CC} -g -o demo           cmoka.c hnfetcher.o   -lcurl -lconfig -lyajl -lncurses -lzlog -lpthread -Wall
+all: queue.o string_utils.o ll_sort_test comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree
 
-
+string_utils.o: string_utils.c
+	${CC}  -g -o string_utils.o  -c string_utils.c ${COPTS}
+t_sample.o: t_sample.c
+	${CC}  -g -o t_sample.o  -c t_sample.c ${COPTS}
+queue.o: queue.c
+	${CC}  -g -o queue.o  -c queue.c ${COPTS}
+comment_fetch.o: comment_fetch.c
+	${CC}  -g -o comment_fetch.o  -c comment_fetch.c ${COPTS} -Wno-nonnull
+bin/comment_test: comment_tester.c t_sample.o comment_tree.o
+	${CC} -g -o bin/comment_test    comment_tester.c  t_sample.o comment_tree.o  ${INC} ${LIB} ${COPTS} -lzlog
+bin/comment_demo: curses_sampler.c 
+	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} -lzlog -lncurses
+bin/curses_tree: crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o 
+	${CC} -g -o bin/curses_tree   crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o \
+			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
+ll_sort_test: ll_sort_test.c
+	${CC}  -g -o bin/ll_sort_test  -c ll_sort_test.c ${COPTS}
 clean:
-	rm -f *.o a.out grabber demo proxy sha1_example comment_test curses_demo
-	rm -f *.o bin/a.out bin/grabber bin/demo bin/proxy bin/sha1_example bin/comment_test bin/curses_demo
-	
-.PHONY: all clean test
+	\rm *.o bin/comment_test bin/curses_tree bin/ll_sort_test
