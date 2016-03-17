@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include "zlog.h"
+#include <pthread.h>
 #define ND queueitem
 typedef enum {
 	PRINT_ALL_TREE = 0,
@@ -12,9 +13,10 @@ typedef struct ND {
 
 
 ND* newQueue(int id);
-void TreeFree(ND* node);
-ND* SearchTree(const ND* node, int id);
-int AppendItem(ND* node, ND* newNode);
+void QueueFree(ND** node);
+ND* SearchQueue(const ND* node, int id);
+int popItem(ND** queue, pthread_mutex_t *lock);
+int AppendItem(ND* node, int newId, pthread_mutex_t *lock);
 int SiblingCount(const ND* node);
 
 int Size(ND* node);
