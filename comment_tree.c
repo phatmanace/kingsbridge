@@ -12,6 +12,10 @@ void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *count
 ND* newCommentTreeNode(int id)
 {
 	ND* item = malloc(sizeof(ND));
+	if(item == NULL){
+		printf("Something went horribly wrong\n");
+		return NULL;
+	}
 
 	item->children = NULL;
 	item->next     = NULL;
@@ -19,6 +23,7 @@ ND* newCommentTreeNode(int id)
 	item->parent   = NULL;
 	item->flags    = 0;
 	item->id       = id;
+	item->parentid = 0;
 	item->_ft_depth = 0;
 	SetSingleExpansionState(item, false);
 	return item;
@@ -30,6 +35,15 @@ ND* newCommentTreeNodeWithText(char* text, int id)
 	item->text       = malloc(strlen(text));
 	strcpy(item->text, text);
 	return item;
+}
+
+ND** allocNodeArray(int sz){
+	ND** n = malloc(sizeof(ND*) * sz);
+	int c = 0;
+	for(c = 0;c < sz;c++){
+		n[c] = NULL;
+	}
+	return n;
 }
 
 
@@ -75,6 +89,30 @@ void TreeFree(ND* node)
 	free(node->text);
 	free(node);
 
+}
+bool exists(const ND* node, int id)
+{
+	return SearchById(node, id) != NULL;
+
+}
+ND* SearchById(const ND* node, int id)
+{
+	ND* found = NULL;
+
+	if (node == NULL){
+		return (ND*)found;
+	}
+
+	if (id == node->id) {
+		return (ND*)node;
+	}
+	if ((found = SearchById(node->next, id)) != NULL){
+		return found;
+	}
+	if ((found = SearchById(node->children, id)) != NULL){
+		return found;
+ 	}		
+	return found;
 }
 ND* SearchTree(const ND* node, char* searchString)
 {

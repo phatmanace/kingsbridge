@@ -1,28 +1,38 @@
 #include <stdbool.h>
 #include "zlog.h"
 #include <pthread.h>
-#define ND queueitem
-typedef enum {
-	PRINT_ALL_TREE = 0,
-	PRINT_ONLY_EXPANDED_NODES
-}node_method;
-typedef struct ND {
+#define QI queueitem
+#define QH queuehead
+
+
+typedef struct QI {
 	int id;
-	struct ND* next;
-} ND;
+	struct QI* next;
+	struct QI* previous;
+} QI;
+
+typedef struct QH {
+	int size;
+	QI* queue;
+} QH;
+
+QH* newQueue();
+
+void QueueFree(QI** node);
+
+QI* SearchQueue(const QI* node, int id);
+
+int QpopItem(QH* head, pthread_mutex_t *lock);
+
+int QAppendItem(QH* head, int newId, pthread_mutex_t *lock);
+
+int QSiblingCount(const QI* node);
+
+int QSize(QH* node);
+
+void PrintQueue(QH* head);
+
+QI* QFindById(QI* node, int id);
 
 
-ND* newQueue(int id);
-void QueueFree(ND** node);
-ND* SearchQueue(const ND* node, int id);
-int popItem(ND** queue, pthread_mutex_t *lock);
-int AppendItem(ND* node, int newId, pthread_mutex_t *lock);
-int SiblingCount(const ND* node);
-
-int Size(ND* node);
-
-ND* FindById(ND* node, int id);
-
-
-#define NODE_EXPANDED 1
-#define NODE_LOCATED  2
+void QueueEntireClear(QH* head);

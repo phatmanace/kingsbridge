@@ -38,6 +38,21 @@ int main(void)
 
 	comment_item_tree* root = make_sample_tree();
 
+	int _raysz = 10 * 1000;
+
+	ND** array = allocNodeArray(_raysz);
+	array[0] = root;
+
+	printf("Done assigning to flat array...\n");
+
+	int _x = 0;
+	for(_x = 0;_x < _raysz;_x++){
+		printf("Array Element %d is %p\n", _x, array[_x]);
+	}
+
+
+	return 0;
+
 	if (SearchTree(root, "Third Level")) {
 		printf("Search Succeded\n");
 	}else{

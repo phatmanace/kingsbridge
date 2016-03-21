@@ -13,6 +13,7 @@ typedef struct ND {
 	struct ND* parent;
 	int flags;
 	int id;
+	int parentid;
 	int _ft_depth;
 } ND;
 
@@ -33,6 +34,9 @@ int  LogPrintTree(zlog_category_t* c, ND* node, node_method print_method);
 bool isExpanded(ND* node);
 bool TreeExists(ND* node, char* searchString);
 ND*  SearchTree(const ND* node, char* searchString);
+ND* SearchById(const ND* node, int id);
+bool exists(const ND* node, int id);
+ND** allocNodeArray(int sz);
 void SetExpansionState(ND* node, bool expanded);
 int  TreeMaxDepth(const ND* node);
 ND* GetNextTreeElement(ND* node);
