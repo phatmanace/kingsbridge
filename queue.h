@@ -12,8 +12,8 @@ typedef struct QI {
 } QI;
 
 typedef struct QH {
-	int size;
-	QI* queue;
+	 int size;
+	 QI* queue;
 } QH;
 
 QH* newQueue();

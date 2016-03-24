@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <regex.h>
-#include <libconfig.h>
+#include "libconfig.h"
 #include "hnarticle.h"
 #include "hnfetcher.h"
 #include "yajl/yajl_tree.h"

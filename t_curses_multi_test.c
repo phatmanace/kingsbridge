@@ -67,7 +67,6 @@ void *downloadSingleURL(void *x)
 	struct thread_args* args = (struct thread_args*)x;
 
 	unsigned int self = (unsigned int)pthread_self();
-	QH* q = args->queue;
 
 	printf("[%u] In Thread loop\n", self);
 	CURL *curl;
@@ -77,22 +76,26 @@ void *downloadSingleURL(void *x)
 		return (void*)0;
 	}
 	printf("[After init] In Thread loop\n");
-	if (q == NULL) {
+	if (args->queue == NULL) {
 		printf("Queue was null...");
 	}
 	;
-	printf("Starting up thread..");
-	int tries = 1;
+	printf("[%u] Starting up thread..", self);
+	int tries = 3;
 	while (tries > 0) {
-		while (QSize(q) > 0) {
+		while (QSize(args->queue) > 0) {
 			struct string s;
 			init_string(&s);
 
-			printf("[%u] before pop queue size is now %d\n", self,  QSize(q));
-			int hnArticle = QpopItem(q, &lock);
+			printf("[%u] before pop queue size is now %d\n", self,  QSize(args->queue));
+			int hnArticle = QpopItem(args->queue, &lock);
+			if(hnArticle == -1){
+				printf("[%u] Blank Article... assume Queue was empty\n", self);
+				continue;
+			}
 			char* url = malloc(sizeof(char) * 100);
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
-			printf("[%u] Popped off  ... %s - queue size is now %d\n", self,  url, QSize(q));
+			printf("[%u] Popped off  ... %s - queue size is now %d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, appendHTMLChunk);
@@ -104,7 +107,7 @@ void *downloadSingleURL(void *x)
 			if (res != CURLE_OK) {
 				free(url);
 				url = NULL;
-				printf("____________BAD STUFF HAPPENED!!\n");
+				printf("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
 				return (void*)0;
 			}
 			json_t *root;
@@ -118,12 +121,12 @@ void *downloadSingleURL(void *x)
 			id = json_object_get(root, "id");
 			jtx = json_object_get(root, "text");
 			if(json_string_value(jtx) != NULL && id != NULL){
-				//char* tx = malloc(strlen(json_string_value(jtx)));
-				//strcpy(tx, json_string_value(jtx));
+				char* tx = malloc(strlen(json_string_value(jtx)));
+				strcpy(tx, json_string_value(jtx));
 				printf("COMMENT_ID %lf which is %d\n ", json_number_value(id), (int)json_number_value(id));
-				//ND* newnode = newCommentTreeNode((int)json_number_value(id));
-				//newnode->text = tx;
-				//args->noderay[args->last_pushed_elem++] = newnode;
+				ND* newnode = newCommentTreeNode((int)json_number_value(id));
+				newnode->text = tx;
+				args->noderay[args->last_pushed_elem++] = newnode;
 			}
 
 			jkids = json_object_get(root, "kids");
@@ -132,9 +135,9 @@ void *downloadSingleURL(void *x)
 				for(i = 0; i < json_array_size(jkids); i++){
 					json_t *kid;
 					kid = json_array_get(jkids, i);
-					printf(" (load child) ID=%d\n", (int)json_number_value(kid));	
-					QAppendItem(q, (int)json_number_value(kid), &lock);
-					json_decref(kid);
+					printf(" [%u] (enqueing child) ID=%d\n", self, (int)json_integer_value(kid));	
+					QAppendItem(args->queue, json_integer_value(kid), &lock);
+					printf(" [%u] (complete_enqueing child) ID=%d\n", self, (int)json_integer_value(kid));	
 				}
 					
 			}
@@ -142,15 +145,12 @@ void *downloadSingleURL(void *x)
 			
 
 			json_decref(root);
-			json_decref(id);
-			json_decref(jtx);
-			json_decref(jkids);
 			
 			free(url);
+			int _sz = QSize(args->queue);
 			url = NULL;
 			printf("[Thread %u] Computing size \n", self);
-			int _sz = QSize(q);
-			printf("[Thread %u] Iteration Complete \n", self);
+			printf("[Thread %u] Iteration Complete [%d] \n", _sz, self);
 		}
 		tries--;
 		sleep(4);
@@ -164,7 +164,7 @@ void *downloadSingleURL(void *x)
 
 
 
-#define NUMT 1
+#define NUMT 2
 
 int main(void)
 {
@@ -195,6 +195,10 @@ int main(void)
 	int i = 0;
 	for (i = 0; i < NUMT; i++) {
 		args->threadid = i;
+		if(i == 0){
+			sleep(1);
+		}
+
 		pthread_create(&thread[i], NULL, downloadSingleURL, args);
 	}
 	for (i = 0; i < NUMT; i++) {

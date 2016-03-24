@@ -149,6 +149,7 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 		return 0;
 	}
 	if(QFindById(head->queue, newId) != NULL){
+		pthread_mutex_unlock(lock);
 		return -1;
 	}
 	QI* tmp = head->queue;
@@ -158,6 +159,7 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 	QI* _n = newQueueItem(newId);
 	if(_n == NULL){
 		printf("Something went horribly wrong\n");
+		pthread_mutex_unlock(lock);
 		return -1;
 	}
 	_n->previous = tmp;
