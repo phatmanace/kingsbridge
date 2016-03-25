@@ -11,6 +11,7 @@
 #include "curl/curl.h"
 #include "yajl/yajl_tree.h"
 #include "jansson.h"
+#include "cjson/cJSON.h"
 
 #define RUNS 10000
 
@@ -71,7 +72,7 @@ void *downloadSingleURL(void *x)
 	printf("[%u] In Thread loop\n", self);
 	CURL *curl;
 	curl = curl_easy_init();
-	if(!curl){
+	if (!curl) {
 		printf("Exiting... Curl didn't seem to init correctly\n");
 		return (void*)0;
 	}
@@ -89,12 +90,12 @@ void *downloadSingleURL(void *x)
 
 			printf("[%u] before pop queue size is now %d\n", self,  QSize(args->queue));
 			int hnArticle = QpopItem(args->queue, &lock);
-			if(hnArticle == -1){
+			if (hnArticle == -1) {
 				printf("[%u] Blank Article... assume Queue was empty\n", self);
 				continue;
 			}
 			char* url = malloc(sizeof(char) * 100);
-			
+
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
 			//printf("[%u] Popped off  ... %s - queue size is now %d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -111,51 +112,46 @@ void *downloadSingleURL(void *x)
 				printf("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
 				return (void*)res;
 			}
-			json_t *root;
-			json_error_t error;
-			json_t *id, *jtx, *jkids;
-			root = json_loads(response_string.ptr, 0, &error);
-			if(!root){
-				printf("JANSSONG PARSE didn't go well :( ");
-				printf("Text was |%s|\n", response_string.ptr);
-			}
-			id = json_object_get(root, "id");
-			jtx = json_object_get(root, "text");
-			if(json_string_value(jtx) != NULL && id != NULL){
-				char* tx = malloc(strlen(json_string_value(jtx)));
-				if(tx == NULL){
-					printf("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
-					return (void*)-1;
-	
+
+			cJSON *json;
+			json = cJSON_Parse(response_string.ptr);
+			if (!json) {
+
+				printf("CJSON Parsing didn't go well :(\n");
+			}else{
+
+				int vcjid = cJSON_GetObjectItem(json, "id")->valueint;
+				cJSON *cjtx = cJSON_GetObjectItem(json, "text");
+				if (cjtx) {
+					char* text = cjtx->valuestring;
+					printf("Length of string was %zu\n", strlen(text));
+					char* tx = malloc(strlen(text) + 1);
+					strcpy(tx, text);
+					ND* newnode = newCommentTreeNode(vcjid);
+					newnode->text = tx;
+					args->noderay[args->last_pushed_elem++] = newnode;
 				}
-				strcpy(tx, json_string_value(jtx));
-				int _comm_id = (int)json_number_value(id);
-				ND* newnode = newCommentTreeNode(_comm_id);
-				//newnode->text = tx;
-				args->noderay[args->last_pushed_elem++] = newnode;
+				cJSON *cjkids = cJSON_GetObjectItem(json, "kids");
+				if (cjkids) {
+					int ikz = cJSON_GetArraySize(cjkids);
+					printf("CJSON Value for id was %d, and kids size is %d\n", vcjid, ikz);
+					int ki = 0;
+					for (ki = 0; ki < ikz; ki++) {
+						int kidid = cJSON_GetArrayItem(cjkids, ki)->valueint;
+						printf("    [CJ]]] ===> %d\n",  kidid);
+						QAppendItem(args->queue, kidid,  &lock);
+					}
+				}
+
+				cJSON_Delete(json);
+
+				(*args->count)++;
 			}
 
-			jkids = json_object_get(root, "kids");
-			if(jkids && json_is_array(jkids)){
-				int i = 0;
-				for(i = 0; i < json_array_size(jkids); i++){
-					json_t *kid;
-					kid = json_array_get(jkids, i);
-					printf(" [%u] (enqueing child) ID=%d\n", self, (int)json_integer_value(kid));	
-					QAppendItem(args->queue, json_integer_value(kid), &lock);
-					printf(" [%u] (complete_enqueing child) ID=%d\n", self, (int)json_integer_value(kid));	
-				}
-					
-			}
-			(*args->count)++;
-			
-
-			//json_decref(root);
-			
 			int _sz = QSize(args->queue);
 			printf("[Thread %u] Computing size \n", self);
 			printf("[Thread %u] Iteration Complete [%d] \n", _sz, self);
-			free(response_string.ptr);
+			//free(response_string.ptr);
 		}
 		tries--;
 		sleep(4);
@@ -169,7 +165,7 @@ void *downloadSingleURL(void *x)
 
 
 
-#define NUMT 1
+#define NUMT 4
 
 int main(void)
 {
@@ -200,7 +196,7 @@ int main(void)
 	int i = 0;
 	for (i = 0; i < NUMT; i++) {
 		args->threadid = i;
-		if(i == 0){
+		if (i == 0) {
 			sleep(1);
 		}
 

@@ -112,7 +112,7 @@ int QpopItem(QH* head, pthread_mutex_t *lock)
 	if(QSize(head) == 1){
 		printf("\nQuick exit for queue size 1\n");
 		id = head->queue->id;
-		QueueFree(&(head->queue));
+		//QueueFree(&(head->queue));
 		head->queue=NULL;
 		pthread_mutex_unlock(lock);
 		PrintQueue(head);
@@ -130,7 +130,7 @@ int QpopItem(QH* head, pthread_mutex_t *lock)
 		
 	}
 	id = tmp->id;
-	QueueFree(&tmp);
+	//QueueFree(&tmp);
 	prev->next = NULL;
 	PrintQueue(head);
 	pthread_mutex_unlock(lock);

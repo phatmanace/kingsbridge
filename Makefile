@@ -1,7 +1,7 @@
 INC=-I/usr/local/include -I/opt/local/include
 LIB=-L/usr/local/lib
 COPTS=-Wall
-ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses
+ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses -lcjson
 
 all: queue.o string_utils.o ll_sort_test comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree bin/ll_test_queue bin/t_curses_multi_test
 
@@ -18,7 +18,7 @@ bin/comment_test: comment_tester.c t_sample.o comment_tree.o
 bin/ll_test_queue: l_test_queue.c queue.o
 	${CC} -pthread -g -o bin/l_test_queue    l_test_queue.c  queue.o  ${INC} ${LIB} ${COPTS} 
 bin/t_curses_multi_test: t_curses_multi_test.c queue.o comment_tree.o
-	${CC} -pthread -g -o bin/t_curses_multi_test  t_curses_multi_test.c comment_tree.o  queue.o  ${INC} ${LIB} ${COPTS}  -lcurl -lyajl -Wno-nonnull -lzlog -ljansson
+	${CC} -pthread -g -o bin/t_curses_multi_test  t_curses_multi_test.c comment_tree.o  queue.o  ${INC} ${LIB} ${COPTS}  -lcurl -lyajl -Wno-nonnull -lzlog -ljansson -lcjson -lm
 bin/comment_demo: curses_sampler.c 
 	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} -lzlog -lncurses
 bin/curses_tree: crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o 
