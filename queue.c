@@ -81,6 +81,8 @@ QI* SearchQueue(const QI* node, int id)
 }
 void PrintQueue(QH* head){
 	
+	#ifdef DEBUG
+	
 	int i = 0;
 	if(head == NULL || head->queue == NULL){
 		printf("               ------------EMPTY QUEUE---------------------\n");
@@ -95,6 +97,7 @@ void PrintQueue(QH* head){
 		i++;
 	}
 		printf("               -----------END OF Print Queue-----------------\n");
+	#endif
 
 }
 int QpopItem(QH* head, pthread_mutex_t *lock)
@@ -184,7 +187,9 @@ int QSize(QH* head)
 
 	while (tmp != NULL) {
 		i++;
+		#ifdef DEBUG
 		printf("Size is now %d\n", i);
+		#endif
 		tmp = tmp->next;
 	}
 	return i;

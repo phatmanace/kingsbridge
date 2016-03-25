@@ -11,11 +11,13 @@ void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *count
  */
 ND* newCommentTreeNode(int id)
 {
+	printf("            [1]  Wondering if I ever got here..\n");
 	ND* item = malloc(sizeof(ND));
 	if(item == NULL){
 		printf("Something went horribly wrong\n");
 		return NULL;
 	}
+	printf("            [2]  Wondering if I ever got here..\n");
 
 	item->children = NULL;
 	item->next     = NULL;
@@ -25,6 +27,7 @@ ND* newCommentTreeNode(int id)
 	item->id       = id;
 	item->parentid = 0;
 	item->_ft_depth = 0;
+	item->text      = NULL;
 	SetSingleExpansionState(item, false);
 	return item;
 }
