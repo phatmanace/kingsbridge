@@ -43,6 +43,7 @@ ND* GetNextTreeElement(ND* node);
 void SetSingleExpansionState(ND* node, bool expanded);
 ND **ToFlatTree(ND *node, int* n);
 int ComputedDepth(ND* node);
+void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth);
 
 #define NODE_EXPANDED 1
 #define NODE_LOCATED  2

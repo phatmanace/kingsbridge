@@ -8,6 +8,7 @@
 
 #include "queue.h"
 #include "comment_tree.h"
+#include "string_utils.h"
 #include "curl/curl.h"
 #include "yajl/yajl_tree.h"
 #include "jansson.h"
@@ -31,6 +32,8 @@ struct string {
 	char *ptr;
 	size_t len;
 };
+
+
 
 
 
@@ -81,8 +84,8 @@ void *downloadSingleURL(void *x)
 		printf("Queue was null...");
 	}
 	;
-	printf("[%u] Starting up thread..", self);
-	int tries = 3;
+	printf("[%u] Starting up thread while()..\n", self);
+	int tries = 1;
 	while (tries > 0) {
 		while (QSize(args->queue) > 0) {
 			struct string response_string;
@@ -97,7 +100,7 @@ void *downloadSingleURL(void *x)
 			char* url = malloc(sizeof(char) * 100);
 
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
-			//printf("[%u] Popped off  ... %s - queue size is now %d\n", self,  url, QSize(args->queue));
+			printf("[%u] %s z:%d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, appendHTMLChunk);
@@ -105,6 +108,7 @@ void *downloadSingleURL(void *x)
 
 			/* Perform the request, res will get the return code */
 			CURLcode res = curl_easy_perform(curl);
+			printf("[%d] URL fetch completed\n", self);
 			/* Check for errors */
 			if (res != CURLE_OK) {
 				free(url);
@@ -122,23 +126,25 @@ void *downloadSingleURL(void *x)
 
 				int vcjid = cJSON_GetObjectItem(json, "id")->valueint;
 				cJSON *cjtx = cJSON_GetObjectItem(json, "text");
+				cJSON *cjparent = cJSON_GetObjectItem(json, "parent");
 				if (cjtx) {
 					char* text = cjtx->valuestring;
-					printf("Length of string was %zu\n", strlen(text));
 					char* tx = malloc(strlen(text) + 1);
 					strcpy(tx, text);
 					ND* newnode = newCommentTreeNode(vcjid);
 					newnode->text = tx;
+					if(cjparent){
+						newnode->parentid = cjparent->valueint;
+					}
 					args->noderay[args->last_pushed_elem++] = newnode;
 				}
 				cJSON *cjkids = cJSON_GetObjectItem(json, "kids");
 				if (cjkids) {
 					int ikz = cJSON_GetArraySize(cjkids);
-					printf("CJSON Value for id was %d, and kids size is %d\n", vcjid, ikz);
 					int ki = 0;
 					for (ki = 0; ki < ikz; ki++) {
 						int kidid = cJSON_GetArrayItem(cjkids, ki)->valueint;
-						printf("    [CJ]]] ===> %d\n",  kidid);
+						printf("[%d]    Queuing up. ===> %d\n", self,  kidid);
 						QAppendItem(args->queue, kidid,  &lock);
 					}
 				}
@@ -157,18 +163,20 @@ void *downloadSingleURL(void *x)
 		sleep(4);
 		printf("[%u] Loop end... tries are now %d\n", self, tries);
 	}
-	printf("[Thread %u] Complete \n", self);
-	curl_easy_cleanup(curl);
+	printf("[Thread %u] Complete and exiting... \n", self);
+	//curl_easy_cleanup(curl);
 	return (void*)0;
 
 }
 
 
 
-#define NUMT 4
+#define NUMT 1
 
 int main(void)
 {
+
+	int id = 11364550;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	pthread_t thread[NUMT];
@@ -185,7 +193,8 @@ int main(void)
 	args->last_pushed_elem = 0;
 	//QAppendItem(queue, 11314597 , &lock);
 	printf("Stuffing something onto the queue\n");
-	QAppendItem(queue, 3472928, &lock);
+
+	QAppendItem(queue, id, &lock);
 	printf("After appending... here is the queue..\n");
 	//PrintQueue(queue);
 	//return 0 ;
@@ -217,12 +226,16 @@ int main(void)
 
 	for (i = 0; i < 1000; i++) {
 		if (args->noderay[i] != NULL) {
-			printf("fb elem @%d was %p, id=%d, tx=%s\n",
+			printf("fb elem @%d was %p, id=%d, par=%d, tx=%s\n",
 			       i,
 			       args->noderay[i],
 			       args->noderay[i]->id,
-			       args->noderay[i]->text);
+			       args->noderay[i]->parentid,
+			       substring(args->noderay[i]->text, 10));
 		}
 	}
+	ND* root = newCommentTreeNode(id);
+	buildCommentTree(root, args->noderay, 1000, 0);
+	PrintTree(root, PRINT_ALL_TREE);
 	return 0;
 }

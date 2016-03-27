@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "zlog.h"
+#include "string_utils.h"
 
 void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *counter,  node_method method);
 /*
@@ -36,6 +37,42 @@ ND* newCommentTreeNodeWithText(char* text, int id)
 	item->text       = malloc(strlen(text));
 	strcpy(item->text, text);
 	return item;
+}
+
+void _log(const char* message){
+	printf("  commentTree(): %s\n", message);
+}
+
+
+void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth)
+{
+	int i = 0;
+	for (i = 0; i < 1000; i++) {
+		if (noderay[i] != NULL && noderay[i]->parentid == root->id ) {
+			/*
+			printf("%.*s-->%d was %p, id=%d, tx=%s\n",
+			       depth,					
+			       "    ",					
+			       i,
+			       noderay[i],
+			       noderay[i]->id,
+			       substring(noderay[i]->text, 10));
+				ND* item = noderay[i];
+				AppendChild(root, item);
+			       buildCommentTree(item, noderay, szRaySz, depth + 1);
+			       */
+			printf("%.*s-->%d tx=%s\n",
+			       depth,					
+			       "    ",					
+			       i,
+			       substring(noderay[i]->text, 30));
+				ND* item = noderay[i];
+				AppendChild(root, item);
+			       buildCommentTree(item, noderay, szRaySz, depth + 1);
+		}
+	}
+		
+
 }
 
 ND** allocNodeArray(int sz){
@@ -336,19 +373,26 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 		                                              , tmp->text
 		                                              ,ChildCount(tmp, false)
 		                                                );
-		 */
 		printf("[%d - %d -  %2d] %s %-25s TS=%4d (id=%d) F=%d) (CC_nr=%d, CC_R=%d, T=%d)\n"
 		       , offset
 		       , isExpanded(tmp)
 		       , *counter
 		       , prefix
-		       , tmp->text
+		       , substring(tmp->text,10)
 		       , TotalSize(tmp)
 		       , tmp->id
 		       , tmp->flags
 		       , ChildCount(tmp, false)
 		       , ChildCount(tmp, true)
 		       , TotalNodeCount(tmp)
+		       );
+		 */
+		printf("[%d - %d -  %2d] %s %-25s \n"
+		       , offset
+		       , isExpanded(tmp)
+		       , *counter
+		       , prefix
+		       , substring(tmp->text,30)
 		       );
 		if (ChildCount(tmp, false) > 0 && (method == PRINT_ALL_TREE || isExpanded(tmp))) {
 			PrintTreeItem(tmp->children, newoffset, counter, method);
