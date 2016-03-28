@@ -32,4 +32,4 @@ ll_sort_test: ll_sort_test.c
 bin/t_patt_test: t_pattern_test.c string_utils.o  
 	${CC}  -g -o bin/t_patt_test string_utils.o  t_pattern_test.c ${COPTS}
 clean:
-	\rm *.o bin/comment_test bin/curses_tree bin/ll_sort_test
+	-rm -fr *.o bin/comment_test bin/curses_tree bin/ll_sort_test bin/l_test_queue* bin/*dSYM bin/comment_demo bin/curses_tree* bin/t_patt_test bin/t_curses_multi_test *dSYM*
