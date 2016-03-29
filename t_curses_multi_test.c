@@ -102,6 +102,7 @@ void *downloadSingleURL(void *x)
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
 			printf("[%u] %s z:%d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, appendHTMLChunk);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
@@ -176,7 +177,8 @@ void *downloadSingleURL(void *x)
 int main(void)
 {
 
-	int id = 11364550;
+	//int id = 11364550;
+	int id = 11380251;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	pthread_t thread[NUMT];
@@ -236,6 +238,7 @@ int main(void)
 	}
 	ND* root = newCommentTreeNode(id);
 	buildCommentTree(root, args->noderay, 1000, 0);
+	printf("Built comment tree - now dumping out tree\n");
 	PrintTree(root, PRINT_ALL_TREE);
 	return 0;
 }

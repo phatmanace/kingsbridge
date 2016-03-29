@@ -387,13 +387,28 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 		       , TotalNodeCount(tmp)
 		       );
 		 */
+		s_segments* segs = splitIntoSegments(tmp->text,60);
+		int y = 0;
+		if(tmp->text != NULL){
+			printf("||%s||@%zu||\n", tmp->text, strlen(tmp->text));
+		}
 		printf("[%d - %d -  %2d] %s %-25s \n"
 		       , offset
-		       , isExpanded(tmp)
+		       , tmp->id
 		       , *counter
 		       , prefix
-		       , substring(tmp->text,30)
+		       , segs->segments[y]->string
 		       );
+		if(segs->count > 1){
+			for(y = 1;y < segs->count;y++){
+				printf("%40s%s\n", 
+						" ",
+						segs->segments[y]->string 
+						);
+			}
+		}
+		freeSegs(segs);
+		
 		if (ChildCount(tmp, false) > 0 && (method == PRINT_ALL_TREE || isExpanded(tmp))) {
 			PrintTreeItem(tmp->children, newoffset, counter, method);
 		}
