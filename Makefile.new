@@ -1,11 +1,4 @@
-INC=-I/usr/local/include -I/opt/local/include
-LIB=-L/usr/lib -L/usr/local/lib
-COPTS=-Wall
-ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses -lcjson -lm
-CFLAGS=-D xDEBUG
 all: comment_tree.o queue.o string_utils.o ll_sort_test comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree bin/ll_test_queue bin/t_curses_multi_test bin/t_patt_test
-
-
 
 comment_tree.o: comment_tree.c string_utils.o
 	${CC} ${INC}  -g -o comment_tree.o string_utils.o  -c comment_tree.c ${COPTS}
