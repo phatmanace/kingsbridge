@@ -16,3 +16,5 @@ char* substring(const char* instr, int len);
 char * searchReplace(char * string, char *toReplace[], char *replacements[], int numReplacements);
 s_segments* splitIntoSegments(char *instr, int width);
 void freeSegs(s_segments* segs);
+char *url_decode(char *str);
+char *url_encode(char *str);

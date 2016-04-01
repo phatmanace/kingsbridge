@@ -44,6 +44,11 @@ int main()
 	instr = NULL;
 	ParseNPrint(instr);
 	_log("pass 3 complete");
+	char* teststr = "https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;";
+	printf("Decode: of %s is %s\n", teststr, url_decode(searchReplace(teststr, char[]{"&#"},  char[]{"%"})));
+
+	//char* foo = {0};
+	//strcpy(foo, "bar");
 
 	return 0;
 }

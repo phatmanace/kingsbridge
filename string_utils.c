@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "string.h"
 #include "string_utils.h"
+#include <ctype.h>
 
 char* makeRepeatedString(char repeatingChar, int count)
 {
@@ -59,9 +60,11 @@ void freeSegs(s_segments* segs)
 	free(segs);
 
 }
-s_segments* _blankSeg(){
+s_segments* _blankSeg()
+{
 	s_segments* segs = malloc(sizeof(segs));
 	ss_string* sp = malloc(sizeof(ss_string));
+
 	sp->string = "";
 	sp->length = 0;
 	segs->segments = malloc(sizeof(ss_string));
@@ -107,6 +110,9 @@ s_segments* splitIntoSegments(char *instr, int width)
 		return _blankSeg();
 	}
 	s_segments* segs = malloc(sizeof(segs));
+	segs->count = 0;
+	segs->debugText = malloc(sizeof(char) * 20);
+	strcpy(segs->debugText, "All_is_well");
 	char* from[1] = { "&#x27;" };
 	char* to[1]   = { "'" };
 
@@ -117,7 +123,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 		//printf("Didn't Replace: %s\n", teststr);
 	}else{
 		//printf("Replaced: %s\n", teststr);
-		teststr = searchReplace(targetstring, from, to, 1);
+		targetstring = searchReplace(targetstring, from, to, 1);
 	}
 
 	// hard coded to 50 strings - this needs sorting...
@@ -125,16 +131,15 @@ s_segments* splitIntoSegments(char *instr, int width)
 
 
 	int _p = 0;
-	int _l = strlen(teststr);
+	int _l = strlen(targetstring);
 
 	int* pointers = malloc(sizeof(int) * 200);
 	int ray_size = 1;
 	int ray_pointer = 0;
 
-
 	for (_p = 0; _p < _l - 3; _p++) {
 		char otherString[] = "000";
-		memcpy(otherString, teststr + _p, 3);
+		memcpy(otherString, targetstring + _p, 3);
 		if (strcmp(otherString, "<p>") == 0) {
 			pointers[ray_pointer++] = _p;
 		}
@@ -145,7 +150,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 	int _last_start =  0;
 	int _last_stop  =  0;
 	for (_p = 0; _p < _l; _p++) {
-		if (teststr[_p] == ' ') {
+		if (targetstring[_p] == ' ') {
 			_last_wb = _p;
 		}
 		if (
@@ -159,8 +164,9 @@ s_segments* splitIntoSegments(char *instr, int width)
 				_last_stop = _last_wb;
 			}
 			ss_string* s = malloc(sizeof(ss_string));
-			s->string = substring(teststr + _last_start, (_last_stop - _last_start));
+			s->string = substring(targetstring + _last_start, (_last_stop - _last_start));
 			s->length = strlen(s->string);
+			///printf("------Stuffing %p into position %d\n", s, segs->count);
 			segs->segments[segs->count] = s;
 			segs->count++;
 
@@ -168,6 +174,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 				ss_string* sp = malloc(sizeof(ss_string));
 				sp->string = "";
 				sp->length = 0;
+				//printf("------Stuffing %p into position %d\n", sp, segs->count);
 				segs->segments[segs->count] = sp;
 				segs->count++;
 
@@ -182,7 +189,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 		}
 	}
 	ss_string* sl = malloc(sizeof(ss_string));
-	sl->string = substring(teststr + _last_start, (strlen(teststr) - _last_start));
+	sl->string = substring(targetstring + _last_start, (strlen(targetstring) - _last_start));
 	sl->length = strlen(sl->string);
 	segs->segments[segs->count] = sl;
 	segs->count++;
@@ -210,7 +217,6 @@ char * searchReplace(char * string,
 		//if str not in the string, exit.
 		if (!(locOfToRep = strstr(string, toRep))) {
 
-			printf("BOOM!BOOM!\n\n");
 			printf("Couldn't find |%s| in |%s|\n", toRep, string);
 			exit(EXIT_FAILURE);
 		}
@@ -228,4 +234,60 @@ char * searchReplace(char * string,
 		}
 	}
 	return buffer;
+}
+
+/* Converts a hex character to its integer value */
+char from_hex(char ch)
+{
+	return isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10;
+}
+
+/* Converts an integer value to its hex character*/
+char to_hex(char code)
+{
+	static char hex[] = "0123456789abcdef";
+
+	return hex[code & 15];
+}
+
+/* Returns a url-encoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *url_encode(char *str)
+{
+	char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
+
+	while (*pstr) {
+		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
+			*pbuf++ = *pstr;
+		else if (*pstr == ' ')
+			*pbuf++ = '+';
+		else
+			*pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
+		pstr++;
+	}
+	*pbuf = '\0';
+	return buf;
+}
+
+/* Returns a url-decoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *url_decode(char *str)
+{
+	char *pstr = str, *buf = malloc(strlen(str) + 1), *pbuf = buf;
+
+	while (*pstr) {
+		if (*pstr == '%') {
+			if (pstr[1] && pstr[2]) {
+				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
+				pstr += 2;
+			}
+		} else if (*pstr == '+') {
+			*pbuf++ = ' ';
+		} else {
+			*pbuf++ = *pstr;
+		}
+		pstr++;
+	}
+	*pbuf = '\0';
+	return buf;
 }

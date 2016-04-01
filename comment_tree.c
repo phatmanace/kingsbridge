@@ -392,6 +392,10 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 		if(tmp->text != NULL){
 			printf("||%s||@%zu||\n", tmp->text, strlen(tmp->text));
 		}
+		if(segs->segments[0] == NULL || segs->segments[0]->string == NULL){
+			printf("Weird....first segment was zero... %s\n", segs->debugText);
+			exit(0);
+		}
 		printf("[%d - %d -  %2d] %s %-25s \n"
 		       , offset
 		       , tmp->id
