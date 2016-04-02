@@ -7,6 +7,8 @@ typedef enum {
 }node_method;
 typedef struct ND {
 	char *text;
+	char **links;
+	int linkcount;
 	struct ND* next;
 	struct ND* previous;
 	struct ND* children;

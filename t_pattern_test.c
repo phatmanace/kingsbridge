@@ -3,6 +3,7 @@
 #include "string.h"
 #include "stdbool.h"
 #include "string_utils.h"
+#include <regex.h>
 
 
 
@@ -45,10 +46,62 @@ int main()
 	ParseNPrint(instr);
 	_log("pass 3 complete");
 	char* teststr = "https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;";
+
 	{
-		char* se[1] = {"&#"};
-		char* re[1] = {"X"};
+		regex_t preg;
+		int rc;
+		char *pattern = "\\&\\#x.F";
+		size_t     nmatch = 2;
+		regmatch_t pmatch[2];
+		if (0 != (rc = regcomp(&preg, pattern, 0))) {
+		      printf("regcomp() failed, returning nonzero (%d)\n", rc);
+		      exit(EXIT_FAILURE);
+		}	
+		printf("RegComp ok...\n");
+		 if (0 != (rc = regexec(&preg, teststr, nmatch, pmatch, REG_ICASE|REG_EXTENDED))) {
+		      printf("Failed to match '%s' with '%s',returning %d.\n",
+		      teststr, pattern, rc);
+		   }else{
+
+			printf("Managed to find %zu subexpressions\n", preg.re_nsub);
+			regfree(&preg);
+			char res[1000];
+			memcpy(res, teststr  + pmatch[0].rm_so, (pmatch[0].rm_eo -pmatch[0].rm_so) );
+			 res[(pmatch[0].rm_eo -pmatch[0].rm_so)] = 0;
+			printf("First Match went from %d to %d and was %s\n", pmatch[0].rm_so, pmatch[0].rm_eo, res);
+
+		}
+	}	
+	{
+		char* se[1] = {"&#x"};
+		char* re[1] = {"%"};
 		printf("Decode: of %s is %s\n", teststr, url_decode(searchReplace(teststr, se, re, 1)));
+		printf("Raw Decode: of %s is %s\n", teststr, searchReplace(teststr, se, re, 1));
+	}
+
+	{
+		printf("1. %s\n", dedup("One find day &#x2F I stumbled on a farm"));
+		printf("2. %s\n", dedup("One find day &#x2F I &#x2F stumbled &#x2F on a farm"));
+
+		printf("3. %s\n", url_decode(dedup("One find day &#x2F I stumbled on a farm")));
+		printf("4. %s\n", url_decode(dedup("One find day &#x2F I &#x2F stumbled &#x2F on a farm")));
+	}
+
+	{
+		char* msg = "from <a href=\"https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#4\" rel=\"nofollow\">https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#4</a><p><pre><code> &quot;Why move the compiler to Go? Not for validation; we have more pragmatic motives: Go is easier to write (correctly) than C. Go is easier to debug than C (even absent a debugger). Go is the only language you&#x27;d need to know; encourages contributions. Go has better modularity, tooling, testing, profiling, ... Go makes parallel execution trivial. Already seeing benefits, and it&#x27;s early yet. Design document: golang.org&#x2F;s&#x2F;go13compiler&quot; </code></pre> and <a href=\"https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#10\" rel=\"nofollow\">2nd Link</a><p><pre><code> &quot;Why translate it, not write it from scratch? Correctness, testing. Steps: Write a custom translator from C to Go. Run the translator, iterate until success. Measure success by bit-identical output. Clean up the code by hand and by machine. Turn it from C-in-Go to idiomatic Go (still happening).&quot;</code></pre>";
+
+		printf("5. %s\n", url_decode(dedup(msg)));
+		char** hyperlinks = NULL;
+		int link_count = 0;
+		printf("6. Extract: %s\n", extract_links(url_decode(dedup(msg)) , hyperlinks, &link_count));
+		printf("    link count = %d\n", link_count);
+	}
+	{
+
+		int link_count = 0;
+		char** hyperlinks = NULL;
+		printf("7. Null Check: %s\n", extract_links(url_decode(dedup(NULL)), hyperlinks, &link_count));
+		printf("    link count = %d\n", link_count);
 	}
 
 	//char* foo = {0};

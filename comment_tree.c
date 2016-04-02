@@ -27,6 +27,8 @@ ND* newCommentTreeNode(int id)
 	item->parentid = 0;
 	item->_ft_depth = 0;
 	item->text      = NULL;
+	item->links     = NULL;
+	item->linkcount = 0;
 	SetSingleExpansionState(item, false);
 	return item;
 }
