@@ -10,30 +10,34 @@
 #define RUNS 10000
 
 
-pthread_mutex_t	lock;
+pthread_mutex_t lock;
 
 
-void *appendLoop(void *arg){
+void *appendLoop(void *arg)
+{
 	QH* q = (QH*)arg;
 	long ct = 0;
-	while(ct < RUNS){
-			int _sleep = rand() % 10;
-			QAppendItem(q, _sleep,  &lock);
-			ct++;
-			usleep(_sleep * 10);
+
+	while (ct < RUNS) {
+		int _sleep = rand() % 10;
+		QAppendItem(q, _sleep,  &lock);
+		ct++;
+		usleep(_sleep * 10);
 	}
 	return arg;
 
 }
 
-void *appendLoop2(void *arg){
+void *appendLoop2(void *arg)
+{
 	QH* q = (QH*)arg;
 	long ct = 0;
-	while(ct < RUNS){
-			int _sleep = rand() % 10;
-			QAppendItem(q, _sleep,  &lock);
-			ct++;
-			usleep(_sleep * 10);
+
+	while (ct < RUNS) {
+		int _sleep = rand() % 10;
+		QAppendItem(q, _sleep,  &lock);
+		ct++;
+		usleep(_sleep * 10);
 	}
 	return arg;
 
@@ -41,9 +45,10 @@ void *appendLoop2(void *arg){
 
 int main(void)
 {
-	
+
 	int pop = 0;
 	pthread_t tid1, tid2;
+
 	printf("Starting Queue test\n");
 	pthread_mutex_init(&lock, NULL);
 	QH* queue = newQueue();

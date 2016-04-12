@@ -79,24 +79,24 @@ void FetchComments(zlog_category_t *c, int hnArticle)
 		if (json_root == NULL) {
 			zlog_info(c, "Parser Errored");
 		}
-                int type = 1;
+		int type = 1;
 		{
 			const char * path[] = { "type", (const char*)0 };
 			yajl_val v = yajl_tree_get(json_root, path, yajl_t_string);
 			if (v) {
 				//zlog_info(c, "%s => %s", path[0], YAJL_GET_STRING(v));
-                                if(strcmp("story", YAJL_GET_STRING(v)) == 0){
-                                    zlog_info(c, "Saw Story");
-                                   type = 2;
-                                }
+				if (strcmp("story", YAJL_GET_STRING(v)) == 0) {
+					zlog_info(c, "Saw Story");
+					type = 2;
+				}
 			}else{
 				zlog_info(c, "Failed to find Type path... \n");
 			}
 		}
 
-                
 
-		if(type == 2){
+
+		if (type == 2) {
 			const char * path[] = { "title", (const char*)0 };
 			yajl_val v = yajl_tree_get(json_root, path, yajl_t_string);
 			if (v) {
@@ -105,7 +105,7 @@ void FetchComments(zlog_category_t *c, int hnArticle)
 				zlog_info(c, "Failed to find Story path... \n");
 			}
 		}
-		if(type == 1){
+		if (type == 1) {
 			const char * path[] = { "text", (const char*)0 };
 			yajl_val v = yajl_tree_get(json_root, path, yajl_t_string);
 			if (v) {
@@ -122,8 +122,8 @@ void FetchComments(zlog_category_t *c, int hnArticle)
 				int i;
 				for (i = 0; i < len; i++) {
 					yajl_val _article = v->u.array.values[i];
-                                        //zlog_info(c, "Comments...: %d", atoi(YAJL_GET_NUMBER(_article)));
-                                        FetchComments(c, atoi(YAJL_GET_NUMBER(_article))); 
+					//zlog_info(c, "Comments...: %d", atoi(YAJL_GET_NUMBER(_article)));
+					FetchComments(c, atoi(YAJL_GET_NUMBER(_article)));
 				}
 			}else{
 				//zlog_info(c, "Failed to find Comment path... \n");

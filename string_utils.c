@@ -9,50 +9,51 @@
 #define OUT_HYL   0
 #define IN_HYL    1
 
-char* extract_links(char *msgin, char** hyperlinks, int* linkcount){
-	if(msgin == NULL){
+char* extract_links(char *msgin, char** hyperlinks, int* linkcount)
+{
+	if (msgin == NULL) {
 		return NULL;
 	}
 	int l = strlen(msgin);
-	char msg[l+1];
-	memset(msg, l+1, 0);
+	char msg[l + 1];
+	memset(msg, l + 1, 0);
 	strcpy(msg, msgin);
 	char* msgout = calloc(l + 1, sizeof(char));
 	hyperlinks = malloc(10 * sizeof(char*));
-	
-	
+
+
 	int _hy_point = 0;
 	int _hy_num = 0;
-	for(_hy_point = 0;_hy_point < 10;_hy_point++){
+	for (_hy_point = 0; _hy_point < 10; _hy_point++) {
 		hyperlinks[_hy_point] = calloc(l + 1, sizeof(char));
 	}
 	_hy_point = 0;
 	_hy_num   = 0;
 
 	int i, _in, _h_ad_start, _fwd_project;
-	i =0;
-	_in =0;
+	i = 0;
+	_in = 0;
 	_h_ad_start  = 0;
 	_fwd_project = 0;
 	char *p = msg;
 	char* loc = strstr(msgin, "a href");
 	printf("Located hyperlink at %s\n", loc);
 	int state = OUT_HYL;
-	
-	while(i < (l - 3)){
+
+	while (i < (l - 3)) {
 		char* hyp = calloc(9, sizeof(char));
 		strncpy(hyp, p, 9);
-		if(strcmp(hyp, "<a href=\"") == 0){
+		if (strcmp(hyp, "<a href=\"") == 0) {
 			state = IN_HYL;
 			_h_ad_start = i + 9;
 			//printf("Hyper was %s (i=%d), Add_start=%d, c=%c\n", hyp, i, _h_ad_start, (p+9)[0]);
 			//printf("%s\n", p);
-			_fwd_project = i+9;
+			_fwd_project = i + 9;
 		}
-		if(state == IN_HYL && i >= _fwd_project && p[0] == '"'){
+		if (state == IN_HYL && i >= _fwd_project && p[0] == '"') {
 			_fwd_project = -1;
 		}
-		if(state == IN_HYL &&  _fwd_project == -1 && p[0] == '>'){
+		if (state == IN_HYL &&  _fwd_project == -1 && p[0] == '>') {
 			_hy_num++;
 			_hy_point = 0;
 			_fwd_project = i + 1;
@@ -61,30 +62,30 @@ char* extract_links(char *msgin, char** hyperlinks, int* linkcount){
 		hyp = calloc(5, sizeof(char));
 		strncpy(hyp, p, 4);
 		//printf("Sample at %d is %s\n", i, hyp);
-		if(strcmp(hyp, "</a>") == 0){
+		if (strcmp(hyp, "</a>") == 0) {
 			//printf("Found end of hyperlink at %d\n", i);
 			state = OUT_HYL;
 			_hy_num++;
 			_hy_point = 0;
-			_fwd_project = i+4;
+			_fwd_project = i + 4;
 		}
-		if(state == IN_HYL && i >= _fwd_project && _fwd_project != -1){
+		if (state == IN_HYL && i >= _fwd_project && _fwd_project != -1) {
 			//printf("stuffint into HL/[%d] @ %d, %c\n", _hy_num, i, p[0]);
 			hyperlinks[_hy_num][_hy_point] = *p;
 			hyperlinks[_hy_num][_hy_point + 1] = '\0';
 			_hy_point++;
 		}
-		if(state == OUT_HYL && i >= _fwd_project){
+		if (state == OUT_HYL && i >= _fwd_project) {
 			//printf("Appending @ %d, %c\n", i, p[0]);
 			msgout[_in] = *p;
-			msgout[_in+1] = '\0';
+			msgout[_in + 1] = '\0';
 			_in++;
 		}
 		i++;
 		p++;
 		free(hyp);
 	}
-	while(_in < l){
+	while (_in < l) {
 		msgout[_in] = *p;
 		_in++;
 		i++;
@@ -100,41 +101,42 @@ char* extract_links(char *msgin, char** hyperlinks, int* linkcount){
 	*linkcount = _hy_num;
 	return msgout;
 }
-char* dedup(char *msgin){
-	if(msgin == NULL){
+char* dedup(char *msgin)
+{
+	if (msgin == NULL) {
 		return NULL;
 	}
 	int l = strlen(msgin);
-	char msg[l+1];
-	memset(msg, l+1, 0);
+	char msg[l + 1];
+	memset(msg, l + 1, 0);
 	strcpy(msg, msgin);
 	char* msgout = malloc(l + 1);
 	int i, _in;
-	i =0;
-	_in =0;
+	i = 0;
+	_in = 0;
 
 	char *p = msg;
 	int sk = 0;
-	while(i < (l - 3)){
-		if(p[0] == '&' && p[1] == '#'){
+	while (i < (l - 3)) {
+		if (p[0] == '&' && p[1] == '#') {
 			p[2] = '%';
 			sk = 3;
 		}
 
-		if(sk > 0){
+		if (sk > 0) {
 			sk--;
 		}
 		i++;
-		if(sk == 0){
+		if (sk == 0) {
 			//printf("Stuffing %c in %d & %d ", p[0], _in, _in + 1);
 			msgout[_in] = *p;
-			msgout[_in+1] = '\0';
+			msgout[_in + 1] = '\0';
 			_in++;
 			//printf("%d/%c %s --> %s\n",_in, p[0],  p, msgout);
 		}
 		p++;
 	}
-	while(_in < l){
+	while (_in < l) {
 		msgout[_in] = *p;
 		_in++;
 		i++;
@@ -143,7 +145,7 @@ char* dedup(char *msgin){
 	}
 
 	return msgout;
-	
+
 }
 
 
@@ -406,7 +408,7 @@ char *url_encode(char *str)
 		else
 			*pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
 		pstr++;
-		if(*pstr == ';'){
+		if (*pstr == ';') {
 			pstr++;
 		}
 	}
@@ -418,7 +420,7 @@ char *url_encode(char *str)
 /* IMPORTANT: be sure to free() the returned string after use */
 char *url_decode(char *str)
 {
-	if(str == NULL){
+	if (str == NULL) {
 		return NULL;
 	}
 	char *pstr = str, *buf = malloc(strlen(str) + 1), *pbuf = buf;
@@ -435,7 +437,7 @@ char *url_decode(char *str)
 			*pbuf++ = *pstr;
 		}
 		pstr++;
-		if(*pstr == ';'){
+		if (*pstr == ';') {
 			pstr++;
 		}
 	}

@@ -12,6 +12,7 @@
 QH* newQueue()
 {
 	QH* head = malloc(sizeof(QH));
+
 	head->size  = 0;
 	head->queue = NULL;
 
@@ -21,7 +22,8 @@ QH* newQueue()
 QI* newQueueItem(int i)
 {
 	QI* item = malloc(sizeof(QI));
-	if(item == NULL){
+
+	if (item == NULL) {
 		printf("ALARM ALARM.. MAlloc() failed\n");
 		return NULL;
 	}
@@ -34,12 +36,12 @@ QI* newQueueItem(int i)
 
 void QueueFree(QI** node)
 {
-	if (node == NULL){
+	if (node == NULL) {
 		return;
 	}
 	free(*node);
 	*node = NULL;
-	
+
 
 }
 
@@ -47,16 +49,16 @@ void QueueEntireClear(QH* head)
 {
 
 	QI* tmp = head->queue;
-	if(tmp == NULL)
-	{
-		return;	
+
+	if (tmp == NULL) {
+		return;
 	}
-	while(tmp->next != NULL){
+	while (tmp->next != NULL) {
 		tmp = tmp->next;
 	}
-	
+
 	QI* prev = tmp;
-	while(prev != NULL){
+	while (prev != NULL) {
 		prev = tmp->previous;
 		QueueFree(&tmp);
 		tmp = prev;
@@ -66,68 +68,68 @@ QI* SearchQueue(const QI* node, int id)
 {
 	QI* found = NULL;
 
-	if (node == NULL){
+	if (node == NULL) {
 		return (QI*)found;
 	}
 
-	if (node->id == id)
-        {
+	if (node->id == id) {
 		return (QI*)node;
 	}
-	if ((found = SearchQueue(node->next, id)) != NULL){
+	if ((found = SearchQueue(node->next, id)) != NULL) {
 		return found;
 	}
 	return found;
 }
-void PrintQueue(QH* head){
-	
+void PrintQueue(QH* head)
+{
+
 	#ifdef DEBUG
-	
+
 	int i = 0;
-	if(head == NULL || head->queue == NULL){
+	if (head == NULL || head->queue == NULL) {
 		printf("               ------------EMPTY QUEUE---------------------\n");
-		return;		
+		return;
 	}
 	QI* tmp = head->queue;
-		printf("                    --> ID @ %d is %d\n", i, tmp->id);
-	
-	while (tmp->next != NULL){
+	printf("                    --> ID @ %d is %d\n", i, tmp->id);
+
+	while (tmp->next != NULL) {
 		printf("                    --> ID @ %d is %d\n", i, tmp->id);
 		tmp = tmp->next;
 		i++;
 	}
-		printf("               -----------END OF Print Queue-----------------\n");
+	printf("               -----------END OF Print Queue-----------------\n");
 	#endif
 
 }
 int QpopItem(QH* head, pthread_mutex_t *lock)
 {
 	pthread_mutex_lock(lock);
-	if (head == NULL || head->queue == NULL){
+	if (head == NULL || head->queue == NULL) {
 		return -1;
 	}
 	int id = -1;
 	PrintQueue(head);
 
-	if(QSize(head) == 1){
+	if (QSize(head) == 1) {
 		printf("\nQuick exit for queue size 1\n");
 		id = head->queue->id;
 		//QueueFree(&(head->queue));
-		head->queue=NULL;
+		head->queue = NULL;
 		pthread_mutex_unlock(lock);
 		PrintQueue(head);
 		return id;
 	}
-		
-	
+
+
 	QI* tmp = head->queue;
 	QI* prev = head->queue;
 	//printf("Setting #1 to %p and #p to %p\n", tmp, prev);
-	while (tmp->next != NULL){
+	while (tmp->next != NULL) {
 		prev = tmp;
 		tmp = tmp->next;
 		//printf(" --> Setting #1 to %p and #p to %p\n", tmp, prev);
-		
+
 	}
 	id = tmp->id;
 	//QueueFree(&tmp);
@@ -139,11 +141,11 @@ int QpopItem(QH* head, pthread_mutex_t *lock)
 
 int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 {
-	if (head == NULL){
+	if (head == NULL) {
 		return -1;
 	}
 	pthread_mutex_lock(lock);
-	if(head->queue == NULL){
+	if (head->queue == NULL) {
 		printf("1st time queueing\n");
 		QI* _n = newQueueItem(newId);
 		head->queue = _n;
@@ -151,16 +153,16 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 		pthread_mutex_unlock(lock);
 		return 0;
 	}
-	if(QFindById(head->queue, newId) != NULL){
+	if (QFindById(head->queue, newId) != NULL) {
 		pthread_mutex_unlock(lock);
 		return -1;
 	}
 	QI* tmp = head->queue;
-	while (tmp->next != NULL){
+	while (tmp->next != NULL) {
 		tmp = tmp->next;
 	}
 	QI* _n = newQueueItem(newId);
-	if(_n == NULL){
+	if (_n == NULL) {
 		printf("Something went horribly wrong\n");
 		pthread_mutex_unlock(lock);
 		return -1;
@@ -177,10 +179,11 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 int QSize(QH* head)
 {
 	int i = 0;
-	if (head == NULL){
+
+	if (head == NULL) {
 		return -1;
 	}
-	if(head == NULL || head->queue == NULL){
+	if (head == NULL || head->queue == NULL) {
 		return 0;
 	}
 	QI* tmp = head->queue;

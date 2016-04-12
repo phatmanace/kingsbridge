@@ -4,4 +4,4 @@ COPTS=-Wall
 ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses -lcjson -lm
 CFLAGS=-D xDEBUG
 
-include Makefile.new
+include Makefile.details

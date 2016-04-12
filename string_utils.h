@@ -1,17 +1,17 @@
 
-typedef struct _ss_string{
+typedef struct _ss_string {
 	char* string;
 	int length;
 }ss_string;
 
-typedef struct _s_segment{
+typedef struct _s_segment {
 	int count;
 	ss_string** segments;
 	char* debugText;
-	
+
 }s_segments;
 
-typedef struct _hlink{
+typedef struct _hlink {
 	ss_string link_address;
 	ss_string link_text;
 }hlink;

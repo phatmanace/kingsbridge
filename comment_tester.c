@@ -46,7 +46,7 @@ int main(void)
 	printf("Done assigning to flat array...\n");
 
 	int _x = 0;
-	for(_x = 0;_x < _raysz;_x++){
+	for (_x = 0; _x < _raysz; _x++) {
 		printf("Array Element %d is %p\n", _x, array[_x]);
 	}
 
@@ -90,24 +90,24 @@ int main(void)
 	printf("Extracting to flat tree\n");
 	int sz = -1;
 	comment_item_tree** _flat = ToFlatTree(root, &sz);
-        
+
 	printf("Extracted to flat tree - sz was %d and tree was %p\n", sz, _flat);
-	int PRINT_WIDTH=20;
-        int y = 0;
-        printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
-        for(y = 0;y < sz;y++){
-            printf("%7d   %20p %20p %20p %4d is %*s\n", y, _flat[y], _flat[y]->parent, _flat[y]->previous, ComputedDepth(_flat[y]), 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text );
-        }
+	int PRINT_WIDTH = 20;
+	int y = 0;
+	printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
+	for (y = 0; y < sz; y++) {
+		printf("%7d   %20p %20p %20p %4d is %*s\n", y, _flat[y], _flat[y]->parent, _flat[y]->previous, ComputedDepth(_flat[y]), 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text );
+	}
 	SetExpansionState(root, FALSE);
 	SetExpansionState(root, TRUE);
-        free(_flat);
+	free(_flat);
 	_flat = ToFlatTree(root, &sz);
-        
+
 	printf("Extracted to full flat tree - sz was %d and tree was %p\n", sz, _flat);
-            printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
-        for(y = 0;y < sz;y++){
-            printf("%7d   %20p %20p %20p %4d is %*s\n", y, _flat[y], _flat[y]->parent, _flat[y]->previous, ComputedDepth(_flat[y]), 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text );
-        }
+	printf("Position %*s  %*s %*s  \n", PRINT_WIDTH, "This", PRINT_WIDTH, "Parent", PRINT_WIDTH, "Previous");
+	for (y = 0; y < sz; y++) {
+		printf("%7d   %20p %20p %20p %4d is %*s\n", y, _flat[y], _flat[y]->parent, _flat[y]->previous, ComputedDepth(_flat[y]), 10 + (2 * _flat[y]->_ft_depth), _flat[y]->text );
+	}
 
 	return 0;
 	if (FindById(root, 4) != NULL) {

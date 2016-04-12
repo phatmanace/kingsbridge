@@ -84,7 +84,7 @@ void RenderRow(WINDOW* win, comment_item_tree* node, int* row, int basecolumn, i
 		wmove(win, *row, column - 1 );  waddch(win, ACS_LLCORNER);
 	}
 
-        wmove(win, *row, basecolumn - 3);  wprintw(win, "%d", *row);
+	wmove(win, *row, basecolumn - 3);  wprintw(win, "%d", *row);
 	if (node->children != NULL && !isExpanded(node)) {
 		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "%s (%d)", node->text, TotalSize(node->children));
 	}else{
@@ -179,16 +179,16 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
 	int _sty = 21;
 
 
-        while (_sty < 35) {
-                while (_stx < 120) {
-                        //wattron(win, A_BOLD | A_BLINK);
-                        DrawBox(win, BOX_H, BOX_W,  _sty, _stx, _stx == 1, _stx > 68);
-                        //wattroff(win, A_BOLD | A_BLINK);
-                        _stx += BOX_W;
-                }
-                _sty += BOX_H;
-                _stx = 1;
-        }
+	while (_sty < 35) {
+		while (_stx < 120) {
+			//wattron(win, A_BOLD | A_BLINK);
+			DrawBox(win, BOX_H, BOX_W,  _sty, _stx, _stx == 1, _stx > 68);
+			//wattroff(win, A_BOLD | A_BLINK);
+			_stx += BOX_W;
+		}
+		_sty += BOX_H;
+		_stx = 1;
+	}
 
 }
 
@@ -211,9 +211,9 @@ int main(void)
 		return -1;
 	}
 
-        FetchComments(c, 11266137);
+	FetchComments(c, 11266137);
 
-        return 1;
+	return 1;
 
 	zlog_info(c, "Program starting... ");
 	DIR           *d;
@@ -231,7 +231,7 @@ int main(void)
 	LogPrintTree(c, tree, PRINT_ONLY_EXPANDED_NODES);
 	zlog_info(c, "Tree Size: %d\n", TotalSize(tree));
 	initscr();
-        mousemask(ALL_MOUSE_EVENTS, NULL);
+	mousemask(ALL_MOUSE_EVENTS, NULL);
 	cbreak();
 	noecho();
 	nonl();
@@ -278,7 +278,7 @@ int main(void)
 	int ch;
 	while ((ch = getch()) != KEY_F(4)) {
 		zlog_info(c, "Trapped Keypress  %d", ch );
-                MEVENT event;
+		MEVENT event;
 		switch (ch) {
 		case KEY_LEFT:
 			zlog_info(c, "Left key");
@@ -298,9 +298,9 @@ int main(void)
 			break;
 
 		}
-                if(getmouse(&event) == OK){
-                    zlog_info(c, "Mouse => %d, %d", event.x, event.y);
-                }
+		if (getmouse(&event) == OK) {
+			zlog_info(c, "Mouse => %d, %d", event.x, event.y);
+		}
 		//LogPrintTree(c, tree, PRINT_ALL_TREE);
 
 	}

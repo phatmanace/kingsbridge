@@ -134,7 +134,7 @@ void *downloadSingleURL(void *x)
 					strcpy(tx, text);
 					ND* newnode = newCommentTreeNode(vcjid);
 					newnode->text = tx;
-					if(cjparent){
+					if (cjparent) {
 						newnode->parentid = cjparent->valueint;
 					}
 					args->noderay[args->last_pushed_elem++] = newnode;
