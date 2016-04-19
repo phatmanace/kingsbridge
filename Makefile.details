@@ -1,5 +1,7 @@
-all: comment_tree.o queue.o string_utils.o ll_sort_test comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree bin/ll_test_queue bin/t_curses_multi_test bin/t_patt_test
+all: tbin comment_tree.o queue.o string_utils.o ll_sort_test comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree bin/ll_test_queue bin/t_curses_multi_test tbin/t_patt_test tbin/t_micro_test
 
+tbin:
+	mkdir  tbin
 comment_tree.o: comment_tree.c string_utils.o
 	${CC} ${INC}  -g -o comment_tree.o string_utils.o  -c comment_tree.c ${COPTS}
 string_utils.o: string_utils.c
@@ -23,7 +25,9 @@ bin/curses_tree: crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o stri
 			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
 ll_sort_test: ll_sort_test.c
 	${CC}  -g -o bin/ll_sort_test  -c ll_sort_test.c ${COPTS}
-bin/t_patt_test: t_pattern_test.c string_utils.o  
-	${CC}  -g -o bin/t_patt_test string_utils.o  t_pattern_test.c ${COPTS}
+tbin/t_patt_test: t_pattern_test.c string_utils.o  
+	${CC}  -g -o tbin/t_patt_test string_utils.o  t_pattern_test.c ${COPTS}
+tbin/t_micro_test: t_micro_test.c string_utils.o  
+	${CC}  -g -o tbin/t_micro_test string_utils.o  t_micro_test.c ${COPTS}
 clean:
-	-rm -fr *.o bin/comment_test bin/curses_tree bin/ll_sort_test bin/l_test_queue* bin/*dSYM bin/comment_demo bin/curses_tree* bin/t_patt_test bin/t_curses_multi_test *dSYM*
+	-rm -fr *.o bin/comment_test bin/curses_tree bin/ll_sort_test bin/l_test_queue* bin/*dSYM bin/comment_demo bin/curses_tree* tbin/t_patt_test bin/t_curses_multi_test *dSYM* tbin

@@ -407,11 +407,12 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 		if (tmp->text != NULL) {
 			printf("||%s||@%zu||\n", tmp->text, strlen(tmp->text));
 		}
+		/*
 		if (segs->segments[0] == NULL || segs->segments[0]->string == NULL) {
 			printf("Weird....first segment was zero... %s\n", segs->debugText);
 			exit(0);
 		}
-		printf("[%d - %d -  %2d] %s %-25s \n"
+		printf("[os/%d-id/%d-count/%2d] %s %-25s \n"
 		       , offset
 		       , tmp->id
 		       , *counter
@@ -426,6 +427,7 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 				       );
 			}
 		}
+		*/
 		freeSegs(segs);
 
 		if (ChildCount(tmp, false) > 0 && (method == PRINT_ALL_TREE || isExpanded(tmp))) {

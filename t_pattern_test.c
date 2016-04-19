@@ -74,6 +74,7 @@ int main()
 		}
 	}
 	{
+		printf("\n\n\n");
 		char* se[1] = { "&#x" };
 		char* re[1] = { "%" };
 		printf("Decode: of %s is %s\n", teststr, url_decode(searchReplace(teststr, se, re, 1)));
@@ -81,6 +82,7 @@ int main()
 	}
 
 	{
+		printf("\n\n\n");
 		printf("1. %s\n", dedup("One find day &#x2F I stumbled on a farm"));
 		printf("2. %s\n", dedup("One find day &#x2F I &#x2F stumbled &#x2F on a farm"));
 
@@ -91,6 +93,7 @@ int main()
 	{
 		char* msg = "from <a href=\"https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#4\" rel=\"nofollow\">https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#4</a><p><pre><code> &quot;Why move the compiler to Go? Not for validation; we have more pragmatic motives: Go is easier to write (correctly) than C. Go is easier to debug than C (even absent a debugger). Go is the only language you&#x27;d need to know; encourages contributions. Go has better modularity, tooling, testing, profiling, ... Go makes parallel execution trivial. Already seeing benefits, and it&#x27;s early yet. Design document: golang.org&#x2F;s&#x2F;go13compiler&quot; </code></pre> and <a href=\"https:&#x2F;&#x2F;talks.golang.org&#x2F;2015&#x2F;gogo.slide#10\" rel=\"nofollow\">2nd Link</a><p><pre><code> &quot;Why translate it, not write it from scratch? Correctness, testing. Steps: Write a custom translator from C to Go. Run the translator, iterate until success. Measure success by bit-identical output. Clean up the code by hand and by machine. Turn it from C-in-Go to idiomatic Go (still happening).&quot;</code></pre>";
 
+		printf("\n\n\n");
 		printf("5. %s\n", url_decode(dedup(msg)));
 		char** hyperlinks = NULL;
 		int link_count = 0;
@@ -99,6 +102,7 @@ int main()
 	}
 
 	{
+		printf("\n\n\n");
 		char* msg = "Tsipras&#x27; response to the leak:<p><a href=\"https:&#x2F;&#x2F;twitter.com&#x2F;wikileaks&#x2F;status&#x2F;716400800499679232\" rel=\"nofollow\">https:&#x2F;&#x2F;twitter.com&#x2F;wikileaks&#x2F;status&#x2F;716400800499679232</a><p>Mostly the Greeks take offense to the IMF, per Bloomberg [1], &quot;considering a plan to cause a credit event in Greece and destabilize Europe.&quot;<p>Also: &quot;Acc to #IMF leak, conf call was held March 19, when Velculescu was still in Athens, Hilton Hotel. Makes you wonder if Hilton is bugged.&quot; [2]<p>[1]<a href=\"http:&#x2F;&#x2F;www.bloomberg.com&#x2F;news&#x2F;articles&#x2F;2016-04-02&#x2F;imf-discussed-pressuring-germany-on-greek-debt-wikileaks-says\" rel=\"nofollow\">http:&#x2F;&#x2F;www.bloomberg.com&#x2F;news&#x2F;articles&#x2F;2016-04-02&#x2F;imf-discus...</a><p>[2] <a href=\"https:&#x2F;&#x2F;twitter.com&#x2F;YanniKouts&#x2F;status&#x2F;716226465910665216\" rel=\"nofollow\">https:&#x2F;&#x2F;twitter.com&#x2F;YanniKouts&#x2F;status&#x2F;716226465910665216</a>";
 		printf("15. %s\n\n", url_decode(dedup(msg)));
 		char** hyperlinks = NULL;
@@ -108,9 +112,18 @@ int main()
 	}
 	{
 
+		printf("\n\n\n");
 		int link_count = 0;
 		char** hyperlinks = NULL;
 		printf("7. Null Check: %s\n", extract_links(url_decode(dedup(NULL)), hyperlinks, &link_count));
+		printf("    link count = %d\n", link_count);
+	}
+	{
+
+		printf("\n\n\n");
+		int link_count = 0;
+		char** hyperlinks = NULL;
+		printf("8. Bogus Link: %s\n", extract_links(url_decode(dedup("I am a dodgy <a href = \"Link here")), hyperlinks, &link_count));
 		printf("    link count = %d\n", link_count);
 	}
 

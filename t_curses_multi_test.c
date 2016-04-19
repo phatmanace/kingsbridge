@@ -15,6 +15,7 @@
 #include "cjson/cJSON.h"
 
 #define RUNS 10000
+#define NUMT 4
 
 
 pthread_mutex_t lock;
@@ -133,7 +134,9 @@ void *downloadSingleURL(void *x)
 					char* tx = malloc(strlen(text) + 1);
 					strcpy(tx, text);
 					ND* newnode = newCommentTreeNode(vcjid);
-					newnode->text = tx;
+					int link_count = 0;
+					char** hyperlinks = NULL;
+					newnode->text = extract_links(url_decode(dedup(tx)), hyperlinks, &link_count);
 					if (cjparent) {
 						newnode->parentid = cjparent->valueint;
 					}
@@ -172,7 +175,6 @@ void *downloadSingleURL(void *x)
 
 
 
-#define NUMT 1
 
 int main(void)
 {
@@ -228,12 +230,12 @@ int main(void)
 
 	for (i = 0; i < 1000; i++) {
 		if (args->noderay[i] != NULL) {
-			printf("fb elem @%d was %p, id=%d, par=%d, tx=%s\n",
+			printf("Debug Element.. elem @%d was %p, id=%d, par=%d, tx=%s\n",
 			       i,
 			       args->noderay[i],
 			       args->noderay[i]->id,
 			       args->noderay[i]->parentid,
-			       substring(args->noderay[i]->text, 10));
+			       substring(args->noderay[i]->text, 100));
 		}
 	}
 	ND* root = newCommentTreeNode(id);
