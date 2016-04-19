@@ -4,12 +4,21 @@
 #include "string.h"
 #include "string_utils.h"
 #include <ctype.h>
+#include <stdarg.h>
 
 
 #define OUT_HYL   0
 #define IN_HYL    1
+void _debug(const char* format, ...) { 
+	#ifdef _SUDEBUG
+	    va_list args;
+	    va_start (args, format);
+	      vfprintf (stdout, format, args);
+		va_end (args);
+#endif
+}
 
-char* extract_links(char *msgin, char** hyperlinks, int* linkcount)
+char* extract_links(char *msgin, listolinks *links, int* linkcount)
 {
 	if (msgin == NULL) {
 		return NULL;
@@ -19,7 +28,7 @@ char* extract_links(char *msgin, char** hyperlinks, int* linkcount)
 	memset(msg, l + 1, 0);
 	strcpy(msg, msgin);
 	char* msgout = calloc(l + 1, sizeof(char));
-	hyperlinks = malloc(10 * sizeof(char*));
+	char** hyperlinks = malloc(10 * sizeof(char*));
 
 
 	int _hy_point = 0;
@@ -99,8 +108,11 @@ char* extract_links(char *msgin, char** hyperlinks, int* linkcount)
 	printf("Hy: %s\n", hyperlinks[2]);
 	printf("Hy: %s\n", hyperlinks[3]);
 	printf("------------------------------------------------------\n");
-	*linkcount = _hy_num;
 	#endif 
+	*linkcount = _hy_num;
+
+	links->links = hyperlinks;
+
 	return msgout;
 }
 char* dedup(char *msgin)
@@ -196,16 +208,16 @@ void freeSegs(s_segments* segs)
 	int i = 0;
 
 	for (i = 0; i < segs->count; i++) {
-		printf("Freeing segemeent %d\n", i);
+		_debug("Freeing segemeent %d\n", i);
 		if(strlen(segs->segments[i]->string) > 0){
 			free(segs->segments[i]->string);
 		}
 		free(segs->segments[i]);
 	}
 
-	printf("Freeing Debug text\n");
+	_debug("Freeing Debug text\n");
 	free(segs->debugText);
-	printf("Freeing Segments header\n");
+	_debug("Freeing Segments header\n");
 	free(segs->segments);
 
 	free(segs);
@@ -233,12 +245,12 @@ s_segments* splitIntoSegments(char *instr, int width)
 	if (instr == NULL) {
 		return _blankSeg();
 	}
-	printf("split(): Attempting to malloc %zu bytes\n", strlen(instr));;
+	_debug("split(): Attempting to malloc %zu bytes\n", strlen(instr));;
 	char *targetstring = malloc(4000);
 	if(targetstring == NULL){
 		printf("Abort!!!!");
 	}
-	printf("Malloced %p ok\n", targetstring);
+	_debug("Malloced %p ok\n", targetstring);
 
 	memset(targetstring, 0, strlen(instr) + 1);
 	targetstring[0] = '\0';
@@ -256,18 +268,18 @@ s_segments* splitIntoSegments(char *instr, int width)
 		/* walk through other tokens */
 		while ( token != NULL ) {
 			if (strlen(token) > width) {
-				printf( "Too Wide...  %s, len=%zu, width=%d\n", token, strlen(token), width );
+				_debug( "Too Wide...  %s, len=%zu, width=%d\n", token, strlen(token), width );
 			}else{
 				ok_strings++;
-				printf("concat(): %s\n", token);
+				_debug("concat(): %s\n", token);
 				strcat(targetstring, space);
 				strcat(targetstring, token);
 			}
 			token = strtok(NULL, space);
 		}
 	}
-	printf("StrLen(): is %zu\n", strlen(targetstring));
-	printf("Found %d strings to move \n", ok_strings);
+	_debug("StrLen(): is %zu\n", strlen(targetstring));
+	_debug("Segemtize(): Found %d strings to move \n", ok_strings);
 	if (ok_strings == 0) {
 		return _blankSeg();
 	}
@@ -280,14 +292,16 @@ s_segments* splitIntoSegments(char *instr, int width)
 	char* to[1]   = { "'" };
 
 	char* teststr = NULL;
+	char* endString = NULL;
 	if (strstr(targetstring, from[0]) == NULL) {
-		teststr = malloc(strlen(targetstring) + 1);
-		strcpy(teststr, targetstring);
-		free(teststr);
+		endString = malloc(strlen(targetstring) + 1);
+		strcpy(endString, targetstring);
+		_debug("Skipping search replace\n");
 		//printf("Didn't Replace: %s\n", teststr);
 	}else{
 		//printf("Replaced: %s\n", teststr);
-		targetstring = searchReplace(targetstring, from, to, 1);
+		_debug("Segmentize(): Replaced end string via\n");
+		endString = searchReplace(targetstring, from, to, 1);
 	}
 
 	// hard coded to 50 strings - this needs sorting...
@@ -295,26 +309,31 @@ s_segments* splitIntoSegments(char *instr, int width)
 
 
 	int _p = 0;
-	int _l = strlen(targetstring);
+	int _l = strlen(endString);
+	_debug("Segemtize(): Chopping up strings, length is %d \n", _l);
+	_debug("Segmentize(): EndString: %s\n", endString);
 
 	int* pointers = malloc(sizeof(int) * 200);
-	int ray_size = 1;
 	int ray_pointer = 0;
 
+	/*
+	 * Find all line breaks, denoted by <p>
+	 */
 	for (_p = 0; _p < _l - 3; _p++) {
 		char otherString[] = "000";
-		memcpy(otherString, targetstring + _p, 3);
+		memcpy(otherString, endString + _p, 3);
 		if (strcmp(otherString, "<p>") == 0) {
 			pointers[ray_pointer++] = _p;
 		}
 	}
 
+	_debug("Segemtize(): Found all line breaks, count was %d \n", ray_pointer);
 
 	int _last_wb    = -1;
 	int _last_start =  0;
 	int _last_stop  =  0;
 	for (_p = 0; _p < _l; _p++) {
-		if (targetstring[_p] == ' ') {
+		if (endString[_p] == ' ') {
 			_last_wb = _p;
 		}
 		if (
@@ -328,9 +347,9 @@ s_segments* splitIntoSegments(char *instr, int width)
 				_last_stop = _last_wb;
 			}
 			ss_string* s = malloc(sizeof(ss_string));
-			s->string = substring(targetstring + _last_start, (_last_stop - _last_start));
+			s->string = substring(endString + _last_start, (_last_stop - _last_start));
 			s->length = strlen(s->string);
-			///printf("------Stuffing %p into position %d\n", s, segs->count);
+			_debug("Segmentize(): Stuffing %p(%s) into position %d\n", s, s->string, segs->count);
 			segs->segments[segs->count] = s;
 			segs->count++;
 
@@ -338,32 +357,38 @@ s_segments* splitIntoSegments(char *instr, int width)
 				ss_string* sp = malloc(sizeof(ss_string));
 				sp->string = "";
 				sp->length = 0;
-				//printf("------Stuffing %p into position %d\n", sp, segs->count);
+				_debug("Segementize(): Stuffing %p into position %d\n", sp, segs->count);
 				segs->segments[segs->count] = sp;
 				segs->count++;
 
 
 			}
 			if (isvalueinarray(_p, pointers, ray_pointer)) {
-				_last_start = _last_stop + 5;
+				_last_start = _last_stop + 3;
 			}else{
 				_last_start = _last_stop + 1;
 			}
 
 		}
 	}
+	_debug("Segementize(): Almost done with segmentization\n");
+
 	ss_string* sl = malloc(sizeof(ss_string));
-	sl->string = substring(targetstring + _last_start, (strlen(targetstring) - _last_start));
+	sl->string = substring(endString + _last_start, (strlen(endString) - _last_start));
 	sl->length = strlen(sl->string);
 	segs->segments[segs->count] = sl;
 	segs->count++;
-	free(targetstring);
+	//free(targetstring);
 	free(pointers);
+	_debug("Segementize(): done with segmentization\n");
 	return segs;
 
 }
 
 #define MAX_SOURCE_SIZE (0x100000)
+
+
+
 
 char * searchReplace(char * string,
 		     char *toReplace[],
@@ -375,30 +400,36 @@ char * searchReplace(char * string,
 	char *toRep;
 	char *rep;
 	int lenToRep, lenStr, lenAfterLocRep;
-	static char buffer[MAX_SOURCE_SIZE];
+	char *tmpString = malloc(strlen(string) + 1);
+	memset(tmpString, 0, strlen(string) + 1);
+	strncpy(tmpString, string, strlen(string));
+	//static char buffer[MAX_SOURCE_SIZE];
+	char* buffer = malloc(MAX_SOURCE_SIZE);
+	memset(buffer, 0, MAX_SOURCE_SIZE);
 
 	for (i = 0; i < numReplacements; ++i) {
 		toRep = toReplace[i];
 		rep = replacements[i];
 		//if str not in the string, exit.
-		if (!(locOfToRep = strstr(string, toRep))) {
+		if (!(locOfToRep = strstr(tmpString, toRep))) {
 
-			printf("Couldn't find |%s| in |%s|\n", toRep, string);
+			printf("Couldn't find |%s| in |%s|\n", toRep, tmpString);
 			exit(EXIT_FAILURE);
 		}
 		while (1) {
-			if (!(locOfToRep = strstr(string, toRep))) {
+			if (!(locOfToRep = strstr(tmpString, toRep))) {
 				break;
 			}
 			lenToRep = strlen(toRep);
-			lenStr = strlen(string);
+			lenStr = strlen(tmpString);
 			lenAfterLocRep = strlen(locOfToRep);
 			sprintf(buffer, "%.*s%s%s",
 				lenStr - lenAfterLocRep,
-				string, rep, locOfToRep + lenToRep);
-			string = buffer;
+				tmpString, rep, locOfToRep + lenToRep);
+			tmpString = buffer;
 		}
 	}
+	free(tmpString);
 	return buffer;
 }
 

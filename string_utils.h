@@ -11,6 +11,10 @@ typedef struct _s_segment {
 
 }s_segments;
 
+typedef struct _listolinks{
+	char** links;
+}listolinks;
+
 typedef struct _hlink {
 	ss_string link_address;
 	ss_string link_text;
@@ -24,5 +28,5 @@ void freeSegs(s_segments* segs);
 char *url_decode(char *str);
 char *url_encode(char *str);
 char* dedup(char *msgin);
-char* extract_links(char *msgin, char** hyperlinks, int* linkcount);
+char* extract_links(char *msgin, listolinks *hyperlinks, int* linkcount);
 

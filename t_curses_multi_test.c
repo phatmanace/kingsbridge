@@ -135,8 +135,12 @@ void *downloadSingleURL(void *x)
 					strcpy(tx, text);
 					ND* newnode = newCommentTreeNode(vcjid);
 					int link_count = 0;
-					char** hyperlinks = NULL;
-					newnode->text = extract_links(url_decode(dedup(tx)), hyperlinks, &link_count);
+					listolinks hyperlinks;
+				       	hyperlinks.links = NULL;	
+					newnode->text = extract_links(url_decode(dedup(tx)), &hyperlinks, &link_count);
+					newnode->linkcount = link_count;
+					printf("Hyperlinks are %p, link #1 is %s\n", hyperlinks, hyperlinks.links[0]);
+					newnode->links = hyperlinks.links;
 					if (cjparent) {
 						newnode->parentid = cjparent->valueint;
 					}
@@ -230,11 +234,12 @@ int main(void)
 
 	for (i = 0; i < 1000; i++) {
 		if (args->noderay[i] != NULL) {
-			printf("Debug Element.. elem @%d was %p, id=%d, par=%d, tx=%s\n",
+			printf("Debug Element.. elem @%d was %p, id=%d, par=%d, lc=%d,  tx=%s\n",
 			       i,
 			       args->noderay[i],
 			       args->noderay[i]->id,
 			       args->noderay[i]->parentid,
+			       args->noderay[i]->linkcount,
 			       substring(args->noderay[i]->text, 100));
 		}
 	}

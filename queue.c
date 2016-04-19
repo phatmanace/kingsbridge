@@ -9,6 +9,13 @@
 /*
  * Create new comment node with nothing
  */
+
+void debug(char *msg){
+	#ifdef _QDEBUG
+	printf("Queue %s\n", msg);
+#endif
+}
+	
 QH* newQueue()
 {
 	QH* head = malloc(sizeof(QH));
@@ -24,7 +31,7 @@ QI* newQueueItem(int i)
 	QI* item = malloc(sizeof(QI));
 
 	if (item == NULL) {
-		printf("ALARM ALARM.. MAlloc() failed\n");
+		debug("ALARM ALARM.. MAlloc() failed\n");
 		return NULL;
 	}
 	item->id = i;
@@ -104,18 +111,22 @@ void PrintQueue(QH* head)
 }
 int QpopItem(QH* head, pthread_mutex_t *lock)
 {
+	debug("          MutexPopLock(): Locking\n");
 	pthread_mutex_lock(lock);
 	if (head == NULL || head->queue == NULL) {
+		debug("          MutexPoPLock(Quick): UnLocking\n");
+		pthread_mutex_unlock(lock);
 		return -1;
 	}
 	int id = -1;
 	PrintQueue(head);
 
 	if (QSize(head) == 1) {
-		printf("\nQuick exit for queue size 1\n");
+		debug("Quick exit for queue size 1\n");
 		id = head->queue->id;
 		//QueueFree(&(head->queue));
 		head->queue = NULL;
+		debug("          MutexPoPLock(Quick): UnLocking\n");
 		pthread_mutex_unlock(lock);
 		PrintQueue(head);
 		return id;
@@ -135,6 +146,7 @@ int QpopItem(QH* head, pthread_mutex_t *lock)
 	//QueueFree(&tmp);
 	prev->next = NULL;
 	PrintQueue(head);
+	debug("         MutexPopLock(End): UnLocking\n");
 	pthread_mutex_unlock(lock);
 	return id;
 }
@@ -144,16 +156,20 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 	if (head == NULL) {
 		return -1;
 	}
+	debug("         MutexAppendLock(): Locking\n");
 	pthread_mutex_lock(lock);
+	debug("         MutexAppendLock(): done Locking\n");
 	if (head->queue == NULL) {
-		printf("1st time queueing\n");
+		debug("1st time queueing\n");
 		QI* _n = newQueueItem(newId);
 		head->queue = _n;
 		PrintQueue(head);
 		pthread_mutex_unlock(lock);
+		debug("         MutexAppendLock(): Unlocking\n");
 		return 0;
 	}
 	if (QFindById(head->queue, newId) != NULL) {
+		debug("         MutexAppendLock(): Unlocking\n");
 		pthread_mutex_unlock(lock);
 		return -1;
 	}
@@ -163,7 +179,8 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 	}
 	QI* _n = newQueueItem(newId);
 	if (_n == NULL) {
-		printf("Something went horribly wrong\n");
+		debug("Something went horribly wrong\n");
+		debug("MutexLock(): Unlocking\n");
 		pthread_mutex_unlock(lock);
 		return -1;
 	}
@@ -171,6 +188,7 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock)
 	tmp->next = _n;
 	_n->next = NULL;
 	PrintQueue(head);
+	debug("MutexLock(): Unlocking\n");
 	pthread_mutex_unlock(lock);
 	return 0;
 }
