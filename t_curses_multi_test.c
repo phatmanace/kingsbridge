@@ -19,6 +19,7 @@
 
 
 pthread_mutex_t lock;
+typedef void (*msgcall)(char*);
 
 struct thread_args {
 	QH* queue;
@@ -27,6 +28,7 @@ struct thread_args {
 	int tcount;
 	ND** noderay;
 	int last_pushed_elem;
+	msgcall callback;
 };
 
 struct string {
@@ -34,6 +36,10 @@ struct string {
 	size_t len;
 };
 
+
+void blip(char* msg){
+	printf("Callback: %s", msg);
+}
 
 
 
@@ -70,10 +76,15 @@ void init_string(struct string *s)
 void *downloadSingleURL(void *x)
 {
 	struct thread_args* args = (struct thread_args*)x;
+	if(args->callback == NULL){
+		printf("Abort - callback function was null\n");
+		return;
+	}
+
 
 	unsigned int self = (unsigned int)pthread_self();
 
-	printf("[%u] In Thread loop\n", self);
+	args->callback("[%u] In Thread loop\n", self);
 	CURL *curl;
 	curl = curl_easy_init();
 	if (!curl) {
@@ -139,7 +150,7 @@ void *downloadSingleURL(void *x)
 				       	hyperlinks.links = NULL;	
 					newnode->text = extract_links(url_decode(dedup(tx)), &hyperlinks, &link_count);
 					newnode->linkcount = link_count;
-					printf("Hyperlinks are %p, link #1 is %s\n", hyperlinks, hyperlinks.links[0]);
+					printf("Hyperlinks are %p, link #1 is %s\n", &hyperlinks, hyperlinks.links[0]);
 					newnode->links = hyperlinks.links;
 					if (cjparent) {
 						newnode->parentid = cjparent->valueint;
@@ -196,6 +207,7 @@ int main(void)
 	struct thread_args* args = malloc(sizeof(struct thread_args));;
 	args->count = &article_count;
 	args->queue = queue;
+	args->callback = &blip;
 	args->tcount = 0;
 	args->noderay = allocNodeArray(1000);
 	args->last_pushed_elem = 0;

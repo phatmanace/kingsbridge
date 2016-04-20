@@ -291,7 +291,6 @@ s_segments* splitIntoSegments(char *instr, int width)
 	char* from[1] = { "&#x27;" };
 	char* to[1]   = { "'" };
 
-	char* teststr = NULL;
 	char* endString = NULL;
 	if (strstr(targetstring, from[0]) == NULL) {
 		endString = malloc(strlen(targetstring) + 1);
