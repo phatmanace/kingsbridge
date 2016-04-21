@@ -1,4 +1,6 @@
 
+#ifndef STRING_UTILS_H
+#define STRING_UTILS_H
 typedef struct _ss_string {
 	char* string;
 	int length;
@@ -29,4 +31,6 @@ char *url_decode(char *str);
 char *url_encode(char *str);
 char* dedup(char *msgin);
 char* extract_links(char *msgin, listolinks *hyperlinks, int* linkcount);
+
+#endif
 

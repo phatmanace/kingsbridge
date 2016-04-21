@@ -55,17 +55,6 @@ size_t appendHTMLChunk(void *ptr, size_t size, size_t memb, struct string *s)
 
 }
 
-void init_string(struct string *s)
-{
-	s->len = 0;
-	s->ptr = malloc(s->len + 1);
-	if (s->ptr == NULL) {
-		fprintf(stderr, "malloc() failed\n");
-		exit(EXIT_FAILURE);
-	}
-	s->ptr[0] = '\0';
-}
-
 void *downloadSingleURL(void *x)
 {
 	struct thread_args* args = (struct thread_args*)x;
@@ -215,6 +204,7 @@ int main(void)
 	args->queue = queue;
 	args->callback = &blip;
 	args->tcount = 0;
+	args->error_code = 0;
 	args->noderay = allocNodeArray(1000);
 	args->last_pushed_elem = 0;
 	//QAppendItem(queue, 11314597 , &lock);
@@ -265,5 +255,6 @@ int main(void)
 	buildCommentTree(root, args->noderay, 1000, 0);
 	printf("Built comment tree - now dumping out tree\n");
 	PrintTree(root, PRINT_ALL_TREE);
+	free(args);
 	return 0;
 }
