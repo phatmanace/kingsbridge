@@ -10,35 +10,30 @@
 #include "comment_tree.h"
 #include "string_utils.h"
 #include "curl/curl.h"
+#include "cjson/cJSON.h"
 #include "yajl/yajl_tree.h"
 #include "jansson.h"
-#include "cjson/cJSON.h"
+#include <stdarg.h>
+#include "downloader.h"
 
 #define RUNS 10000
-#define NUMT 4
+#define NUMT 1
 
 
 pthread_mutex_t lock;
-typedef void (*msgcall)(char*);
-
-struct thread_args {
-	QH* queue;
-	int* count;
-	int threadid;
-	int tcount;
-	ND** noderay;
-	int last_pushed_elem;
-	msgcall callback;
-};
-
-struct string {
-	char *ptr;
-	size_t len;
-};
 
 
-void blip(char* msg){
-	printf("Callback: %s", msg);
+
+
+void blip(char* format, ...){
+
+	#ifdef _S_CURSES_DEBUG 
+	va_list args;
+	va_start(args, format);
+	printf("t_curses_multi_test()::");
+	vprintf(format, args);
+	va_end(args);
+	#endif
 }
 
 
@@ -71,14 +66,13 @@ void init_string(struct string *s)
 	s->ptr[0] = '\0';
 }
 
-
-
 void *downloadSingleURL(void *x)
 {
 	struct thread_args* args = (struct thread_args*)x;
+	pthread_mutex_t lock = args->lock;
 	if(args->callback == NULL){
 		printf("Abort - callback function was null\n");
-		return;
+		return (void*)0;
 	}
 
 
@@ -88,31 +82,35 @@ void *downloadSingleURL(void *x)
 	CURL *curl;
 	curl = curl_easy_init();
 	if (!curl) {
-		printf("Exiting... Curl didn't seem to init correctly\n");
+		args->callback("Exiting... Curl didn't seem to init correctly\n");
 		return (void*)0;
 	}
-	printf("[After init] In Thread loop\n");
+	args->callback("[After init] In Thread loop\n");
 	if (args->queue == NULL) {
-		printf("Queue was null...");
+		args->callback("Queue was null...");
 	}
 	;
-	printf("[%u] Starting up thread while()..\n", self);
-	int tries = 1;
+	args->callback("[%u] Starting up thread while()..\n", self);
+	int tries = 3;
 	while (tries > 0) {
 		while (QSize(args->queue) > 0) {
+			if(tries == 1){
+				tries++;
+			}
 			struct string response_string;
 			init_string(&response_string);
 
-			printf("[%u] before pop queue size is now %d\n", self,  QSize(args->queue));
+			args->callback("[T:%u] before pop queue size is now %d\n", self,  QSize(args->queue));
 			int hnArticle = QpopItem(args->queue, &lock);
 			if (hnArticle == -1) {
-				printf("[%u] Blank Article... assume Queue was empty\n", self);
+				args->callback("[%u] Blank Article... assume Queue was empty\n", self);
 				continue;
 			}
 			char* url = malloc(sizeof(char) * 100);
 
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
-			printf("[%u] %s z:%d\n", self,  url, QSize(args->queue));
+			args->callback("[T:%u] %s z:%d\n", self,  url, QSize(args->queue));
+			printf("[T:%u] %s z:%d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
 			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -121,12 +119,12 @@ void *downloadSingleURL(void *x)
 
 			/* Perform the request, res will get the return code */
 			CURLcode res = curl_easy_perform(curl);
-			printf("[%d] URL fetch completed\n", self);
+			args->callback("[T:%d] URL fetch completed\n", self);
 			/* Check for errors */
 			if (res != CURLE_OK) {
 				free(url);
 				url = NULL;
-				printf("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
+				args->callback("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
 				return (void*)res;
 			}
 
@@ -134,7 +132,7 @@ void *downloadSingleURL(void *x)
 			json = cJSON_Parse(response_string.ptr);
 			if (!json) {
 
-				printf("CJSON Parsing didn't go well :(\n");
+				args->callback("CJSON Parsing didn't go well :(\n");
 			}else{
 
 				int vcjid = cJSON_GetObjectItem(json, "id")->valueint;
@@ -148,9 +146,15 @@ void *downloadSingleURL(void *x)
 					int link_count = 0;
 					listolinks hyperlinks;
 				       	hyperlinks.links = NULL;	
+					pthread_mutex_lock(&lock);
 					newnode->text = extract_links(url_decode(dedup(tx)), &hyperlinks, &link_count);
+					pthread_mutex_unlock(&lock);
 					newnode->linkcount = link_count;
-					printf("Hyperlinks are %p, link #1 is %s\n", &hyperlinks, hyperlinks.links[0]);
+					if(link_count > 0){
+						args->callback("Hyperlinks are %p, link #1 is %s\n", &hyperlinks, hyperlinks.links[0]);
+						args->callback("Processed: %s\n", newnode->text);
+						args->callback("Original: %s\n", tx);
+					}
 					newnode->links = hyperlinks.links;
 					if (cjparent) {
 						newnode->parentid = cjparent->valueint;
@@ -163,7 +167,7 @@ void *downloadSingleURL(void *x)
 					int ki = 0;
 					for (ki = 0; ki < ikz; ki++) {
 						int kidid = cJSON_GetArrayItem(cjkids, ki)->valueint;
-						printf("[%d]    Queuing up. ===> %d\n", self,  kidid);
+						args->callback("[T:%d]    Queuing up. ===> %d\n", self,  kidid);
 						QAppendItem(args->queue, kidid,  &lock);
 					}
 				}
@@ -174,19 +178,21 @@ void *downloadSingleURL(void *x)
 			}
 
 			int _sz = QSize(args->queue);
-			printf("[Thread %u] Computing size \n", self);
-			printf("[Thread %u] Iteration Complete [%d] \n", _sz, self);
+			args->callback("[Thread %u] Computing size \n", self);
+			args->callback("[Thread %u] Iteration Complete [%d] \n", _sz, self);
 			//free(response_string.ptr);
 		}
 		tries--;
-		sleep(4);
-		printf("[%u] Loop end... tries are now %d\n", self, tries);
+		sleep(1);
+		args->callback("[%u] Loop end... tries are now %d\n", self, tries);
 	}
-	printf("[Thread %u] Complete and exiting... \n", self);
+	args->callback("[Thread %u] Complete and exiting... \n", self);
 	//curl_easy_cleanup(curl);
 	return (void*)0;
 
 }
+
+
 
 
 

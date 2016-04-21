@@ -1,3 +1,6 @@
+#ifndef COMMENT_TREE_H
+#define COMMENT_TREE_H
+
 #include <stdbool.h>
 #include "zlog.h"
 #define ND comment_item_tree
@@ -49,3 +52,4 @@ void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth);
 
 #define NODE_EXPANDED 1
 #define NODE_LOCATED  2
+#endif

@@ -1,3 +1,5 @@
+#ifndef QUEUE_H
+#define QUEUE_H
 #include <stdbool.h>
 #include "zlog.h"
 #include <pthread.h>
@@ -36,3 +38,5 @@ QI* QFindById(QI* node, int id);
 
 
 void QueueEntireClear(QH* head);
+
+#endif

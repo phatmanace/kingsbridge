@@ -10,16 +10,18 @@
 #define OUT_HYL   0
 #define IN_HYL    1
 void _debug(const char* format, ...) { 
-	#ifdef _SUDEBUG
+	#ifdef _S_DEBUG
 	    va_list args;
 	    va_start (args, format);
+		printf("-----------------string_utils:");
 	      vfprintf (stdout, format, args);
 		va_end (args);
-#endif
+	#endif
 }
 
 char* extract_links(char *msgin, listolinks *links, int* linkcount)
 {
+	_debug("Extract Links In: %s\n", msgin);
 	if (msgin == NULL) {
 		return NULL;
 	}
@@ -46,17 +48,20 @@ char* extract_links(char *msgin, listolinks *links, int* linkcount)
 	_fwd_project = 0;
 	char *p = msg;
 	char* loc = strstr(msgin, "a href");
-	printf("Located hyperlink at %s\n", loc);
+	if(loc != NULL){
+		_debug("Located hyperlink at %s\n", loc);
+	}
 	int state = OUT_HYL;
 
 	while (i < (l - 3)) {
-		char* hyp = malloc(sizeof(char) * 9);
-		memset(hyp, 0, 9);
+		char* hyp = malloc(sizeof(char) * 10);
+		memset(hyp, 0, 10);
 		strncpy(hyp, p, 9);
+		_debug("Scanning: %s\n", hyp);
 		if (strcmp(hyp, "<a href=\"") == 0) {
 			state = IN_HYL;
 			_h_ad_start = i + 9;
-			//printf("Hyper was %s (i=%d), Add_start=%d, c=%c\n", hyp, i, _h_ad_start, (p+9)[0]);
+			_debug("Start_Hyper() Hyper was %s (i=%d), Add_start=%d, c=%c\n", hyp, i, _h_ad_start, (p+9)[0]);
 			//printf("%s\n", p);
 			_fwd_project = i + 9;
 		}
@@ -72,20 +77,25 @@ char* extract_links(char *msgin, listolinks *links, int* linkcount)
 		strncpy(hyp, p, 4);
 		//printf("Sample at %d is %s\n", i, hyp);
 		if (strcmp(hyp, "</a>") == 0) {
-			//printf("Found end of hyperlink at %d\n", i);
+			_debug("Found end of hyperlink at %d\n", i);
 			state = OUT_HYL;
+			msgout[_in] = '@';
+			_in++;
+			msgout[_in] = 'L';
+			msgout[_in + 1] = '\0';
+			_in++;
 			_hy_num++;
 			_hy_point = 0;
 			_fwd_project = i + 4;
 		}
 		if (state == IN_HYL && i >= _fwd_project && _fwd_project != -1) {
-			//printf("stuffint into HL/[%d] @ %d, %c\n", _hy_num, i, p[0]);
+			_debug("stuffint into HL/[%d] @ %d, %c\n", _hy_num, i, p[0]);
 			hyperlinks[_hy_num][_hy_point] = *p;
 			hyperlinks[_hy_num][_hy_point + 1] = '\0';
 			_hy_point++;
 		}
 		if (state == OUT_HYL && i >= _fwd_project) {
-			//printf("Appending @ %d, %c\n", i, p[0]);
+			_debug("Appending @ %d, %c\n", i, p[0]);
 			msgout[_in] = *p;
 			msgout[_in + 1] = '\0';
 			_in++;
@@ -101,6 +111,7 @@ char* extract_links(char *msgin, listolinks *links, int* linkcount)
 		msgout[_in] = '\0';
 		p++;
 	}
+	_debug("Hyperlink output(): %s\n", msgout);
 	#ifdef _S_DEBUG
 	printf("------------------------------------------------------\n");
 	printf("Hy: %s\n", hyperlinks[0]);
@@ -271,7 +282,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 				_debug( "Too Wide...  %s, len=%zu, width=%d\n", token, strlen(token), width );
 			}else{
 				ok_strings++;
-				_debug("concat(): %s\n", token);
+				//_debug("concat(): %s\n", token);
 				strcat(targetstring, space);
 				strcat(targetstring, token);
 			}

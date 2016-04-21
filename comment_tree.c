@@ -411,7 +411,7 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 			printf("Weird....first segment was zero... %s\n", segs->debugText);
 			exit(0);
 		}
-		printf("[os/%d-id/%d-count/%2d] %s %-25s \n"
+		printf("[os/%d-id/%d-count/%2d] %s %s \n"
 		       , offset
 		       , tmp->id
 		       , *counter
@@ -426,10 +426,11 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 				       );
 			}
 		}
-		printf("         link count=%d   \n", tmp->linkcount );
-		int lc=0;
-		for(lc = 0;lc < tmp->linkcount;lc += 2){
-			printf("Link at %d is (%s)\n", lc, tmp->links[0]);
+		if(tmp->linkcount > 0){
+			int lc=0;
+			for(lc = 0;lc < tmp->linkcount;lc += 2){
+				printf("%20s Link at %d is (%s)\n"," ", lc, tmp->links[lc]);
+			}
 		}
 		freeSegs(segs);
 
