@@ -165,6 +165,10 @@ void add_article_by_hash(struct article **list, char *text, char *link, char *ha
 	} else {
 
 		struct article *newnode = malloc(sizeof( struct article));
+		if (newnode == NULL) {
+			printf("Malloc() failed");
+			return;
+		}
 		zlog_info(c, "add_article_non_init() recentlly allocated node is (%s) %p   (nn=%p) ", text, *list, newnode);
 		if (newnode == NULL) {
 			zlog_info(c, "Error mallocing new node");
@@ -180,9 +184,6 @@ void add_article_by_hash(struct article **list, char *text, char *link, char *ha
 		newnode->next = NULL;
 		newnode->previous = NULL;
 		newnode->init = 1;
-		if (newnode == NULL) {
-			printf("Malloc() failed");
-		}
 
 		newnode->link = malloc(strlen(link) + 1);
 		strcpy(newnode->link, link);
@@ -212,13 +213,14 @@ void add_article(struct article *list, char *text, char *link, char *hash)
 
 
 	struct article *tempnode = malloc(sizeof( struct article));
+	if (tempnode == NULL) {
+		printf("Malloc() failed");
+		return;
+	}
 
 	list->init++;
 	tempnode->init = 0;
 	tempnode->flags = 0;
-	if (tempnode == NULL) {
-		printf("Malloc() failed");
-	}
 
 	tempnode->link = malloc(strlen(link) + 1);
 	strcpy(tempnode->link, link);

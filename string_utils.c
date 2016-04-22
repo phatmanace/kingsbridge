@@ -299,8 +299,6 @@ s_segments* splitIntoSegments(char *instr, int width)
 	segs->segments = NULL;
 	segs->debugText = malloc(sizeof(char) * 20);
 	strcpy(segs->debugText, "All_is_well");
-	char* from[1] = { "&#x27;" };
-	char* to[1]   = { "'" };
 
 	char* endString = NULL;
 	if (strstr(targetstring, from[0]) == NULL) {
@@ -311,6 +309,8 @@ s_segments* splitIntoSegments(char *instr, int width)
 	}else{
 		//printf("Replaced: %s\n", teststr);
 		_debug("Segmentize(): Replaced end string via\n");
+		char* from[1] = { "&#x27;" };
+		char* to[1]   = { "'" };
 		endString = searchReplace(targetstring, from, to, 1);
 	}
 
@@ -407,7 +407,6 @@ char * searchReplace(char * string,
 {
 	int i = 0;
 	char *locOfToRep;
-	char *toRep;
 	char *rep;
 	int lenToRep, lenStr, lenAfterLocRep;
 	char *tmpString = malloc(strlen(string) + 1);
