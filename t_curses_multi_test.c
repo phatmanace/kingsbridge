@@ -18,6 +18,7 @@
 
 #define RUNS 10000
 #define NUMT 1
+#define _S_CURSES_DEBUG 1
 
 
 pthread_mutex_t lock;
@@ -55,37 +56,7 @@ size_t appendHTMLChunk(void *ptr, size_t size, size_t memb, struct string *s)
 
 }
 
-void *downloadSingleURL(void *x)
-{
-	struct thread_args* args = (struct thread_args*)x;
-	pthread_mutex_t lock = args->lock;
-	if(args->callback == NULL){
-		printf("Abort - callback function was null\n");
-		return (void*)0;
-	}
-
-
-	unsigned int self = (unsigned int)pthread_self();
-
-	args->callback("[%u] In Thread loop\n", self);
-	CURL *curl;
-	curl = curl_easy_init();
-	if (!curl) {
-		args->callback("Exiting... Curl didn't seem to init correctly\n");
-		return (void*)0;
-	}
-	args->callback("[After init] In Thread loop\n");
-	if (args->queue == NULL) {
-		args->callback("Queue was null...");
-	}
-	;
-	args->callback("[%u] Starting up thread while()..\n", self);
-	int tries = 3;
-	while (tries > 0) {
-		while (QSize(args->queue) > 0) {
-			if(tries == 1){
-				tries++;
-			}
+/*
 			struct string response_string;
 			init_string(&response_string);
 
@@ -106,10 +77,8 @@ void *downloadSingleURL(void *x)
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, appendHTMLChunk);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
 
-			/* Perform the request, res will get the return code */
 			CURLcode res = curl_easy_perform(curl);
 			args->callback("[T:%d] URL fetch completed\n", self);
-			/* Check for errors */
 			if (res != CURLE_OK) {
 				free(url);
 				url = NULL;
@@ -164,7 +133,39 @@ void *downloadSingleURL(void *x)
 				cJSON_Delete(json);
 
 				(*args->count)++;
+*/
+void *downloadSingleURL(void *x)
+{
+	struct thread_args* args = (struct thread_args*)x;
+	pthread_mutex_t lock = args->lock;
+	if(args->callback == NULL){
+		printf("Abort - callback function was null\n");
+		return (void*)0;
+	}
+
+
+	unsigned int self = (unsigned int)pthread_self();
+
+	args->callback("[%u] In Thread loop\n", self);
+	CURL *curl;
+	curl = curl_easy_init();
+	if (!curl) {
+		args->callback("Exiting... Curl didn't seem to init correctly\n");
+		return (void*)0;
+	}
+	args->callback("[After init] In Thread loop\n");
+	if (args->queue == NULL) {
+		args->callback("Queue was null...");
+	}
+	;
+	args->callback("[%u] Starting up thread while()..\n", self);
+	int tries = 3;
+	while (tries > 0) {
+		while (QSize(args->queue) > 0) {
+			if(tries == 1){
+				tries++;
 			}
+				downloadURL(lock, args, self, curl);
 
 			int _sz = QSize(args->queue);
 			args->callback("[Thread %u] Computing size \n", self);
@@ -175,7 +176,7 @@ void *downloadSingleURL(void *x)
 		sleep(1);
 		args->callback("[%u] Loop end... tries are now %d\n", self, tries);
 	}
-	args->callback("[Thread %u] Complete and exiting... \n", self);
+	args->callback("[Thread %u] Complete and exiting (errors=%d)... \n", self, args->error_code);
 	//curl_easy_cleanup(curl);
 	return (void*)0;
 
