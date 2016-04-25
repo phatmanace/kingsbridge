@@ -47,7 +47,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 			char* url = malloc(sizeof(char) * 100);
 
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
-			args->callback("[T:%u] %s z:%d\n", self,  url, QSize(args->queue));
+			args->callback("[T:%u] %s z:%d", self,  url, QSize(args->queue));
 			printf("[T:%u] %s z:%d\n", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
 			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
@@ -57,7 +57,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 
 			/* Perform the request, res will get the return code */
 			CURLcode res = curl_easy_perform(curl);
-			args->callback("[T:%d] URL fetch completed\n", self);
+			args->callback("[T:%d] URL fetch completed", self);
 			/* Check for errors */
 			if (res != CURLE_OK) {
 				free(url);
@@ -88,9 +88,9 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 					pthread_mutex_unlock(&lock);
 					newnode->linkcount = link_count;
 					if(link_count > 0){
-						args->callback("Hyperlinks are %p, link #1 is %s\n", &hyperlinks, hyperlinks.links[0]);
-						args->callback("Processed: %s\n", newnode->text);
-						args->callback("Original: %s\n", tx);
+						args->callback("Hyperlinks are %p, link #1 is %s", &hyperlinks, hyperlinks.links[0]);
+						args->callback("Processed: %s", newnode->text);
+						args->callback("Original: %s", tx);
 					}
 					newnode->links = hyperlinks.links;
 					if (cjparent) {
@@ -104,7 +104,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 					int ki = 0;
 					for (ki = 0; ki < ikz; ki++) {
 						int kidid = cJSON_GetArrayItem(cjkids, ki)->valueint;
-						args->callback("[T:%d]    Queuing up. ===> %d\n", self,  kidid);
+						args->callback("[T:%d]    Queuing up. ===> %d", self,  kidid);
 						QAppendItem(args->queue, kidid,  &lock);
 					}
 				}

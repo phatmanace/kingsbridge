@@ -1,9 +1,18 @@
 #include <ncurses.h>
+#include "queue.h"
 #include "comment_tree.h"
 #include "comment_fetch.h"
 #include "t_sample.h"
 #include "zlog.h"
 #include <dirent.h>
+#include <pthread.h>
+#include "curl/curl.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include "downloader.h"
+#define NUMT 1
+#define _TS_CURSES_DEBUG 1
+#define HN_ARTICLE 11558607
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 
@@ -15,14 +24,75 @@ int _total_tree_size = 0;
 int WINDOW_SIZE = 16;
 int start_row = 0;
 
+pthread_mutex_t lock;
+
 comment_item_tree* tree = NULL;
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void moveDown(WINDOW* win);
 void moveUp(WINDOW* win);
 void toggleExpand(WINDOW* win, bool newState);
 
+void blip(char* format, ...){
 
-void RenderRow(WINDOW* win, comment_item_tree* node, int* row, int basecolumn, int rowindex,  int _y, int mode)
+	#ifdef _TS_CURSES_DEBUG 
+	va_list args;
+	va_start(args, format);
+	char buffer[1800] = {0};
+	vsprintf(buffer, format, args);
+	va_end(args);
+	zlog_info(c, "Curses_tester: %s", buffer);
+	#endif
+}
+
+void *downloadSingleURL(void *x)
+{
+	struct thread_args* args = (struct thread_args*)x;
+	zlog_info(c, "Downloading Single URL");
+	if(args->callback == NULL){
+		zlog_info(c, "Abort - callback function was null\n");
+		return (void*)0;
+	}
+
+
+	unsigned int self = (unsigned int)pthread_self();
+
+	args->callback("[%u] In Thread loop\n", self);
+	CURL *curl;
+	curl = curl_easy_init();
+	if (!curl) {
+		args->callback("Exiting... Curl didn't seem to init correctly\n");
+		return (void*)0;
+	}
+	args->callback("[After init] In Thread loop\n");
+	if (args->queue == NULL) {
+		args->callback("Queue was null...");
+	}
+	;
+	args->callback("[%u] Starting up thread while()..\n", self);
+	int tries = 3;
+	while (tries > 0) {
+		while (QSize(args->queue) > 0) {
+			if(tries == 1){
+				tries++;
+			}
+				downloadURL(lock, args, self, curl);
+
+			int _sz = QSize(args->queue);
+			args->callback("[Thread %u] Computing size ", self);
+			args->callback("[Thread %u] Iteration Complete [%d] ", _sz, self);
+			//free(response_string.ptr);
+		}
+		tries--;
+		sleep(1);
+		args->callback("[%u] Loop end... tries are now %d", self, tries);
+	}
+	args->callback("[Thread %u] Complete and exiting (errors=%d)... ", self, args->error_code);
+	curl_easy_cleanup(curl);
+	return (void*)0;
+
+}
+
+void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  int _y, int mode)
 {
 
 	int column = basecolumn + (2 * node->_ft_depth);
@@ -193,6 +263,75 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
 }
 
 
+ND* BuildTree()
+{
+
+
+	//int id = 11364550;
+	int id = HN_ARTICLE;
+
+	curl_global_init(CURL_GLOBAL_ALL);
+	pthread_t thread[NUMT];
+	printf("Starting Queue curl test\n");
+	pthread_mutex_init(&lock, NULL);
+	printf("initialized locks\n");
+	QH* queue = newQueue();
+	int article_count = 0;
+	struct thread_args* args = malloc(sizeof(struct thread_args));;
+	args->count = &article_count;
+	args->queue = queue;
+	args->callback = &blip;
+	args->tcount = 0;
+	args->error_code = 0;
+	args->noderay = allocNodeArray(1000);
+	args->last_pushed_elem = 0;
+	//QAppendItem(queue, 11314597 , &lock);
+	printf("Stuffing something onto the queue\n");
+
+	QAppendItem(queue, id, &lock);
+	printf("After appending... here is the queue..\n");
+	//PrintQueue(queue);
+	//return 0 ;
+	printf("Starting up thread environment\n");
+	struct timeval tv1, tv2;
+	gettimeofday(&tv1, NULL);
+
+	int i = 0;
+	for (i = 0; i < NUMT; i++) {
+		args->threadid = i;
+		pthread_create(&thread[i], NULL, downloadSingleURL, args);
+	}
+	for (i = 0; i < NUMT; i++) {
+		pthread_join(thread[i], NULL);
+	}
+	printf("All Threads have finished... carrying on..");
+	pthread_mutex_destroy(&lock);
+	QueueEntireClear(queue);
+	free(queue);
+	curl_global_cleanup();
+	gettimeofday(&tv2, NULL);
+	double time_spent = (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 +
+			    (double)(tv2.tv_sec - tv1.tv_sec);
+	printf("Time Spent was %lfs, articles download were %d \n ", time_spent, *(args->count));
+
+	for (i = 0; i < 1000; i++) {
+		if (args->noderay[i] != NULL) {
+			printf("Debug Element.. elem @%d was %p, id=%d, par=%d, lc=%d,  tx=%s\n",
+			       i,
+			       args->noderay[i],
+			       args->noderay[i]->id,
+			       args->noderay[i]->parentid,
+			       args->noderay[i]->linkcount,
+			       substring(args->noderay[i]->text, 100));
+		}
+	}
+	ND* root = newCommentTreeNode(id);
+	buildCommentTree(root, args->noderay, 1000, 0);
+	printf("Built comment tree - now dumping out tree\n");
+	free(args);
+	return root;
+}
+
 
 
 
@@ -211,11 +350,11 @@ int main(void)
 		return -1;
 	}
 
-	FetchComments(c, 11266137);
 
-	return 1;
+
 
 	zlog_info(c, "Program starting... ");
+	tree = BuildTree();
 	DIR           *d;
 	struct dirent *dir;
 	d = opendir("/var/tmp");
@@ -226,7 +365,8 @@ int main(void)
 
 		closedir(d);
 	}
-	tree = make_sample_tree();
+
+	zlog_info(c, "Created Tree From Sample Text..");
 	SetExpansionState(tree, TRUE);
 	LogPrintTree(c, tree, PRINT_ONLY_EXPANDED_NODES);
 	zlog_info(c, "Tree Size: %d\n", TotalSize(tree));

@@ -10,11 +10,7 @@
 #include "hnfetcher.h"
 #include "yajl/yajl_tree.h"
 #include "zlog.h"
-
-struct string {
-	char *ptr;
-	size_t len;
-};
+#include "downloader.h"
 
 
 
@@ -34,16 +30,6 @@ size_t appendHTMLChunk(void *ptr, size_t size, size_t memb, struct string *s)
 
 }
 
-void init_string(struct string *s)
-{
-	s->len = 0;
-	s->ptr = malloc(s->len + 1);
-	if (s->ptr == NULL) {
-		fprintf(stderr, "malloc() failed\n");
-		exit(EXIT_FAILURE);
-	}
-	s->ptr[0] = '\0';
-}
 
 void FetchComments(zlog_category_t *c, int hnArticle)
 {

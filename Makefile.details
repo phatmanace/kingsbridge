@@ -21,8 +21,8 @@ tbin/t_curses_multi_test: t_curses_multi_test.c queue.o comment_tree.o string_ut
 	${CC} -pthread -g -o tbin/t_curses_multi_test  t_curses_multi_test.c string_utils.o comment_tree.o downloader.o  queue.o  ${INC} ${LIB} ${COPTS}  -lcurl -lyajl -Wno-nonnull -lzlog -ljansson -lcjson -lm
 bin/comment_demo: curses_sampler.c 
 	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} -lzlog -lncurses
-bin/curses_tree: crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o string_utils.o
-	${CC} -g -o bin/curses_tree   crs_tree_test.c t_sample.o comment_fetch.o string_utils.o comment_tree.o \
+bin/curses_tree: crs_tree_test.c t_sample.o comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
+	${CC} -pthread -g -o bin/curses_tree   crs_tree_test.c t_sample.o comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
 			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
 bin/ll_sort_test: ll_sort_test.c
 	${CC}  -g -o bin/ll_sort_test  -c ll_sort_test.c ${COPTS}
