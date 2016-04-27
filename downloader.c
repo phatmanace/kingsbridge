@@ -38,17 +38,16 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 			struct string response_string;
 			init_string(&response_string);
 
-			args->callback("[T:%u] before pop queue size is now %d\n", self,  QSize(args->queue));
+			args->callback(1, "[T:%u] before pop queue size is now %d\n", self,  QSize(args->queue));
 			int hnArticle = QpopItem(args->queue, &lock);
 			if (hnArticle == -1) {
-				args->callback("[%u] Queue was empty\n", self);
+				args->callback(1, "[%u] Queue was empty\n", self);
 				return;
 			}
 			char* url = malloc(sizeof(char) * 100);
 
 			sprintf(url, "https://hacker-news.firebaseio.com/v0/item/%d.json", hnArticle);
-			args->callback("[T:%u] %s z:%d", self,  url, QSize(args->queue));
-			printf("[T:%u] %s z:%d\n", self,  url, QSize(args->queue));
+			args->callback(2, "[T:%u] %s Queue size:%-4d", self,  url, QSize(args->queue));
 			curl_easy_setopt(curl, CURLOPT_URL, url);
 			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -57,19 +56,19 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 
 			/* Perform the request, res will get the return code */
 			CURLcode res = curl_easy_perform(curl);
-			args->callback("[T:%d] URL fetch completed", self);
+			args->callback(1, "[T:%d] URL fetch completed", self);
 			/* Check for errors */
 			if (res != CURLE_OK) {
 				free(url);
 				url = NULL;
-				args->callback("____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
+				args->callback(1, "____________BAD STUFF HAPPENED ErrorCode=%d!!\n", res);
 				return;
 			}
 
 			cJSON *json;
 			json = cJSON_Parse(response_string.ptr);
 			if (!json) {
-				args->callback("CJSON Parsing didn't go well :(\n");
+				args->callback(1, "CJSON Parsing didn't go well :(\n");
 			}else{
 
 				int vcjid = cJSON_GetObjectItem(json, "id")->valueint;
@@ -88,9 +87,9 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 					pthread_mutex_unlock(&lock);
 					newnode->linkcount = link_count;
 					if(link_count > 0){
-						args->callback("Hyperlinks are %p, link #1 is %s", &hyperlinks, hyperlinks.links[0]);
-						args->callback("Processed: %s", newnode->text);
-						args->callback("Original: %s", tx);
+						args->callback(1, "Hyperlinks are %p, link #1 is %s", &hyperlinks, hyperlinks.links[0]);
+						args->callback(1, "Processed: %s", newnode->text);
+						args->callback(1, "Original: %s", tx);
 					}
 					newnode->links = hyperlinks.links;
 					if (cjparent) {
@@ -104,7 +103,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 					int ki = 0;
 					for (ki = 0; ki < ikz; ki++) {
 						int kidid = cJSON_GetArrayItem(cjkids, ki)->valueint;
-						args->callback("[T:%d]    Queuing up. ===> %d", self,  kidid);
+						args->callback(1, "[T:%d]    Queuing up. ===> %d", self,  kidid);
 						QAppendItem(args->queue, kidid,  &lock);
 					}
 				}

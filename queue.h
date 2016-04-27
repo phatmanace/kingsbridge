@@ -16,6 +16,7 @@ typedef struct QI {
 typedef struct QH {
 	int size;
 	QI* queue;
+	bool dead;
 } QH;
 
 QH* newQueue();
@@ -31,6 +32,7 @@ int QAppendItem(QH* head, int newId, pthread_mutex_t *lock);
 int QSiblingCount(const QI* node);
 
 int QSize(QH* node);
+void QMarkDead(QH* node, bool dead, pthread_mutex_t *lock);
 
 void PrintQueue(QH* head);
 

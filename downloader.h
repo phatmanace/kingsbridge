@@ -5,7 +5,7 @@
 #include "string_utils.h"
 #include "curl/curl.h"
 #include <stdlib.h>
-typedef void (*msgcall)(char*, ...);
+typedef void (*msgcall)(int, char*, ...);
 
 struct string {
 	char *ptr;

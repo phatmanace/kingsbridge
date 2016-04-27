@@ -1,7 +1,7 @@
 INC=-I/usr/local/include -I/opt/local/include
 LIB=-L/usr/local/lib -L/opt/local/lib
 COPTS=-Wall
-ALL_LIBS=-lyajl -lcurl  -lzlog  -lncurses
+ALL_LIBS=-lcjson -lyajl -lcurl  -lzlog  -lncurses
 CFLAGS=-D xDEBUG
 
 include Makefile.details

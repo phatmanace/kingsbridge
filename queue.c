@@ -22,8 +22,18 @@ QH* newQueue()
 
 	head->size  = 0;
 	head->queue = NULL;
+	head->dead = false;
 
 	return head;
+}
+void QMarkDead(QH* node, bool dead, pthread_mutex_t *lock)
+{
+	if(node == NULL || lock == NULL){
+		return;
+	}
+	pthread_mutex_lock(lock);
+	node->dead = dead;
+	pthread_mutex_unlock(lock);
 }
 
 QI* newQueueItem(int i)

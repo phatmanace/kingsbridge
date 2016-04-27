@@ -26,6 +26,7 @@ ND* newCommentTreeNode(int id);
 ND* newCommentTreeNodeWithText(char* text, int id);
 
 int  SiblingCount(const ND* node);
+void ResetFlatTree(ND* node);
 ND* FindById(ND* node, int id);
 int  Size(ND* node);
 int  TotalSize(ND* node);

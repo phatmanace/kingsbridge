@@ -26,13 +26,14 @@ pthread_mutex_t lock;
 
 
 
-void blip(char* format, ...){
+void blip(int level, char* format, ...){
 
 	#ifdef _S_CURSES_DEBUG 
 	va_list args;
 	va_start(args, format);
 	printf("t_curses_multi_test()::");
 	vprintf(format, args);
+	printf("\n");
 	va_end(args);
 	#endif
 }
@@ -146,19 +147,19 @@ void *downloadSingleURL(void *x)
 
 	unsigned int self = (unsigned int)pthread_self();
 
-	args->callback("[%u] In Thread loop\n", self);
+	args->callback(1, "[%u] In Thread loop\n", self);
 	CURL *curl;
 	curl = curl_easy_init();
 	if (!curl) {
-		args->callback("Exiting... Curl didn't seem to init correctly\n");
+		args->callback(1, "Exiting... Curl didn't seem to init correctly\n");
 		return (void*)0;
 	}
-	args->callback("[After init] In Thread loop\n");
+	args->callback(1, "[After init] In Thread loop\n");
 	if (args->queue == NULL) {
-		args->callback("Queue was null...");
+		args->callback(1, "Queue was null...");
 	}
 	;
-	args->callback("[%u] Starting up thread while()..\n", self);
+	args->callback(1, "[%u] Starting up thread while()..\n", self);
 	int tries = 3;
 	while (tries > 0) {
 		while (QSize(args->queue) > 0) {
@@ -168,15 +169,15 @@ void *downloadSingleURL(void *x)
 				downloadURL(lock, args, self, curl);
 
 			int _sz = QSize(args->queue);
-			args->callback("[Thread %u] Computing size \n", self);
-			args->callback("[Thread %u] Iteration Complete [%d] \n", _sz, self);
+			args->callback(1, "[Thread %u] Computing size \n", self);
+			args->callback(1, "[Thread %u] Iteration Complete [%d] \n", _sz, self);
 			//free(response_string.ptr);
 		}
 		tries--;
 		sleep(1);
-		args->callback("[%u] Loop end... tries are now %d\n", self, tries);
+		args->callback(1, "[%u] Loop end... tries are now %d\n", self, tries);
 	}
-	args->callback("[Thread %u] Complete and exiting (errors=%d)... \n", self, args->error_code);
+	args->callback(1, "[Thread %u] Complete and exiting (errors=%d)... \n", self, args->error_code);
 	//curl_easy_cleanup(curl);
 	return (void*)0;
 
@@ -191,7 +192,7 @@ int main(void)
 {
 
 	//int id = 11364550;
-	int id = 11555286;
+	int id = 11565720;
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	pthread_t thread[NUMT];
@@ -252,9 +253,9 @@ int main(void)
 			       substring(args->noderay[i]->text, 100));
 		}
 	}
-	ND* root = newCommentTreeNode(id);
+	ND* root = newCommentTreeNodeWithText( "Article Head", id);
 	buildCommentTree(root, args->noderay, 1000, 0);
-	printf("Built comment tree - now dumping out tree\n");
+	printf("Built comment tree - now dumping out tree, which has size %d\n", TotalSize(root));
 	PrintTree(root, PRINT_ALL_TREE);
 	free(args);
 	return 0;

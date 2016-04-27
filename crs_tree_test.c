@@ -6,13 +6,17 @@
 #include "zlog.h"
 #include <dirent.h>
 #include <pthread.h>
+#include <string.h>
 #include "curl/curl.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include "downloader.h"
 #define NUMT 1
 #define _TS_CURSES_DEBUG 1
-#define HN_ARTICLE 11558607
+#define MODE_NORMAL 0
+#define MODE_LOADING 1
+#define BAD_HN_ARTICLE 11569726
+#define HN_ARTICLE 11569857
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 
@@ -23,24 +27,39 @@ comment_item_tree** _flat = NULL;
 int _total_tree_size = 0;
 int WINDOW_SIZE = 16;
 int start_row = 0;
+char *msg1 = NULL;
+int mode = MODE_NORMAL;
+WINDOW* win;
 
 pthread_mutex_t lock;
 
 comment_item_tree* tree = NULL;
 WINDOW *create_newwin(int height, int width, int starty, int startx);
+void RenderTreeIntoWindow(comment_item_tree* tree);
 void moveDown(WINDOW* win);
 void moveUp(WINDOW* win);
 void toggleExpand(WINDOW* win, bool newState);
 
-void blip(char* format, ...){
+void blip(int level, char* format, ...){
 
 	#ifdef _TS_CURSES_DEBUG 
 	va_list args;
 	va_start(args, format);
-	char buffer[1800] = {0};
-	vsprintf(buffer, format, args);
+	char* buffer;
+	vasprintf(&buffer, format, args);
 	va_end(args);
 	zlog_info(c, "Curses_tester: %s", buffer);
+	if(level > 1){
+		if(msg1 != NULL){
+			free(msg1);
+		}
+		msg1 = malloc(strlen(buffer) + 1);
+		strcpy(msg1, buffer);
+		free(buffer);
+		RenderTreeIntoWindow( tree);
+		refresh();
+	}
+	wrefresh(win);
 	#endif
 }
 
@@ -56,19 +75,19 @@ void *downloadSingleURL(void *x)
 
 	unsigned int self = (unsigned int)pthread_self();
 
-	args->callback("[%u] In Thread loop\n", self);
+	args->callback(1, "[%u] In Thread loop\n", self);
 	CURL *curl;
 	curl = curl_easy_init();
 	if (!curl) {
-		args->callback("Exiting... Curl didn't seem to init correctly\n");
+		args->callback(1, "Exiting... Curl didn't seem to init correctly\n");
 		return (void*)0;
 	}
-	args->callback("[After init] In Thread loop\n");
+	args->callback(1, "[After init] In Thread loop\n");
 	if (args->queue == NULL) {
-		args->callback("Queue was null...");
+		args->callback(1, "Queue was null...");
 	}
 	;
-	args->callback("[%u] Starting up thread while()..\n", self);
+	args->callback(1, "[%u] Starting up thread while()..\n", self);
 	int tries = 3;
 	while (tries > 0) {
 		while (QSize(args->queue) > 0) {
@@ -78,15 +97,15 @@ void *downloadSingleURL(void *x)
 				downloadURL(lock, args, self, curl);
 
 			int _sz = QSize(args->queue);
-			args->callback("[Thread %u] Computing size ", self);
-			args->callback("[Thread %u] Iteration Complete [%d] ", _sz, self);
+			args->callback(1, "[Thread %u] Computing size ", self);
+			args->callback(1, "[Thread %u] Iteration Complete [%d] ", _sz, self);
 			//free(response_string.ptr);
 		}
 		tries--;
 		sleep(1);
-		args->callback("[%u] Loop end... tries are now %d", self, tries);
+		args->callback(1, "[%u] Loop end... tries are now %d", self, tries);
 	}
-	args->callback("[Thread %u] Complete and exiting (errors=%d)... ", self, args->error_code);
+	args->callback(1, "[Thread %u] Complete and exiting (errors=%d)... ", self, args->error_code);
 	curl_easy_cleanup(curl);
 	return (void*)0;
 
@@ -156,12 +175,12 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 
 	wmove(win, *row, basecolumn - 3);  wprintw(win, "%d", *row);
 	if (node->children != NULL && !isExpanded(node)) {
-		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "%s (%d)", node->text, TotalSize(node->children));
+		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "%s (%d)", substring(node->text, 10), TotalSize(node->children));
 	}else{
-		wmove(win, *row, column + SPLINE_COL);  wprintw(win, node->text);
+		wmove(win, *row, column + SPLINE_COL);  wprintw(win, substring(node->text, 30));
 	}
 	wattron(win, COLOR_PAIR(3));
-	wmove(win, *row, 35); wprintw(win, "cc=%4d  d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
+	wmove(win, *row, 55); wprintw(win, "cc=%4d  d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
 				      ChildCount(node, false),
 				      node->_ft_depth,
 				      _total_tree_size,
@@ -217,18 +236,43 @@ void DrawBox(WINDOW* win, int height, int width, int starty, int startx, bool is
 
 }
 
-void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
+void RenderTreeIntoWindow(comment_item_tree* tree)
 {
 	zlog_info(c, "Rendering window %dX%d", win->_maxy, win->_maxx);
+	wbkgd(win, COLOR_PAIR(1));
+	refresh();
+	wmove(win, 2, 1);
+	//wattron(win, A_BOLD | A_BLINK);
+	wattron(win,  A_BOLD);
+	wattron(win, COLOR_PAIR(2));
+	zlog_info(c, "Starting to parse the tree");
+	if(mode == MODE_LOADING){
+		wprintw(win, "Loading in articles...one moment please  ");
+	}else{
+		wprintw(win, "News Comments for article ( %d in total) ", TotalSize(tree) );
+	}
+	wattroff(win, COLOR_PAIR(2));
+
+	wattroff(win, A_BOLD);
+
+
 
 	int row = 4;
 	while (row < 30) {
 		wmove(win, row, 1);  wprintw(win, "%*s", 120, "");
 		row++;
 	}
+	if(msg1 != NULL && mode == MODE_LOADING){
+		wmove(win, LINES - 4, 1);
+		wprintw(win, "%s", msg1);
+	}
 
 	row = 4;
 	int txcol = 7;
+	if(_flat != NULL){
+		free(_flat);
+	}
+	ResetFlatTree(tree);
 	_flat = ToFlatTree(tree, &_total_tree_size);
 
 	zlog_info(c, "Rendering total of  %d rows", _total_tree_size);
@@ -238,10 +282,45 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
 			break;
 		}
 		int chosen_element = MAX(row + start_row - 4, 0);
-		zlog_info(c, ">>Rendering  row  %d, ray elem %d - real elem %d ", row, row + start_row - 4, chosen_element);
+		if(chosen_element >= _total_tree_size){
+			zlog_info(c, "Hit Max, stopping iteration..");
+			break;
+		}
+		zlog_info(c, ">>Rendering  row  %d, ray elem %d - real elem/index %d ", row, row + start_row - 4, chosen_element);
 		RenderRow(win, _flat[chosen_element], &row, txcol, row - 4, 0, -1);
 	}
 
+
+
+	int _text_start = 24;
+	if(_selected > -1){
+		row = _text_start;
+		while (row < 39) {
+			wmove(win, row, 2);  wprintw(win, "%*s", 120, "");
+			row++;
+		}
+
+		wmove(win, _text_start, 1);
+		s_segments* segs = splitIntoSegments(_flat[_selected]->text, 90);
+		int _p = 0;
+		for (_p = 0; _p < segs->count; _p++) {
+			wmove(win, _text_start + _p, 4);
+			wprintw(win, "%s", segs->segments[_p]->string);
+		}
+		freeSegs(segs);
+		if(msg1 != NULL){
+			free(msg1);
+		}
+		msg1 = malloc(50);
+		memset(msg1, 0, 50);
+		sprintf(msg1, "ID: %d", _flat[_selected]->id);
+		wmove(win, LINES - 4, 1);
+		wprintw(win, "%120s", "");
+		wmove(win, LINES - 4, 1);
+		wprintw(win, "%s", msg1);
+	}
+
+	/*
 
 	int BOX_W = 11;
 	int BOX_H = 3;
@@ -260,6 +339,8 @@ void RenderTreeIntoWindow(WINDOW* win, comment_item_tree* tree)
 		_stx = 1;
 	}
 
+	*/
+
 }
 
 
@@ -272,9 +353,7 @@ ND* BuildTree()
 
 	curl_global_init(CURL_GLOBAL_ALL);
 	pthread_t thread[NUMT];
-	printf("Starting Queue curl test\n");
 	pthread_mutex_init(&lock, NULL);
-	printf("initialized locks\n");
 	QH* queue = newQueue();
 	int article_count = 0;
 	struct thread_args* args = malloc(sizeof(struct thread_args));;
@@ -286,13 +365,10 @@ ND* BuildTree()
 	args->noderay = allocNodeArray(1000);
 	args->last_pushed_elem = 0;
 	//QAppendItem(queue, 11314597 , &lock);
-	printf("Stuffing something onto the queue\n");
 
 	QAppendItem(queue, id, &lock);
-	printf("After appending... here is the queue..\n");
 	//PrintQueue(queue);
 	//return 0 ;
-	printf("Starting up thread environment\n");
 	struct timeval tv1, tv2;
 	gettimeofday(&tv1, NULL);
 
@@ -304,7 +380,6 @@ ND* BuildTree()
 	for (i = 0; i < NUMT; i++) {
 		pthread_join(thread[i], NULL);
 	}
-	printf("All Threads have finished... carrying on..");
 	pthread_mutex_destroy(&lock);
 	QueueEntireClear(queue);
 	free(queue);
@@ -312,27 +387,27 @@ ND* BuildTree()
 	gettimeofday(&tv2, NULL);
 	double time_spent = (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 +
 			    (double)(tv2.tv_sec - tv1.tv_sec);
-	printf("Time Spent was %lfs, articles download were %d \n ", time_spent, *(args->count));
+	zlog_info(c, "Downloaded artciles in %lf Seconds", time_spent);
 
-	for (i = 0; i < 1000; i++) {
-		if (args->noderay[i] != NULL) {
-			printf("Debug Element.. elem @%d was %p, id=%d, par=%d, lc=%d,  tx=%s\n",
-			       i,
-			       args->noderay[i],
-			       args->noderay[i]->id,
-			       args->noderay[i]->parentid,
-			       args->noderay[i]->linkcount,
-			       substring(args->noderay[i]->text, 100));
-		}
-	}
-	ND* root = newCommentTreeNode(id);
+	ND* root = newCommentTreeNodeWithText( "Article Head", id);
 	buildCommentTree(root, args->noderay, 1000, 0);
-	printf("Built comment tree - now dumping out tree\n");
 	free(args);
 	return root;
 }
 
 
+
+void RefreshData(){
+	mode = MODE_LOADING;
+	RenderTreeIntoWindow(tree);
+	refresh();
+	wrefresh(win);
+	tree = BuildTree();
+	mode = MODE_NORMAL;
+	RenderTreeIntoWindow(tree);
+	refresh();
+	wrefresh(win);
+}
 
 
 int main(void)
@@ -354,7 +429,6 @@ int main(void)
 
 
 	zlog_info(c, "Program starting... ");
-	tree = BuildTree();
 	DIR           *d;
 	struct dirent *dir;
 	d = opendir("/var/tmp");
@@ -385,33 +459,21 @@ int main(void)
 	init_pair(4, COLOR_RED, COLOR_BLUE);
 
 	int startx, starty, width, height;
-	height = 40;
-	width  = 150;
+	height = LINES - 2;
+	width  = COLS - 2;
 	starty = (LINES - height) / 4;  /* Calculating for a center placement */
 	startx = (COLS - width) / 2;    /* of */
 	refresh();
-	WINDOW *win = create_newwin(height, width, starty, startx);
+	win = create_newwin(height, width, starty, startx);
 	if (win == NULL) {
 		zlog_info(c, "Window Was null...\n");
 		endwin();
 		printf("Window was null??\n");
 		return -1;
 	}
-	wbkgd(win, COLOR_PAIR(1));
-	refresh();
-	wmove(win, 2, 1);
-	//wattron(win, A_BOLD | A_BLINK);
-	wattron(win,  A_BOLD);
-	wattron(win, COLOR_PAIR(2));
-	zlog_info(c, "Starting to parse the tree");
-	wprintw(win, "News Comments for article ( %d in total) ", TotalSize(tree) );
-	wattroff(win, COLOR_PAIR(2));
-
-	wattroff(win, A_BOLD);
-
 
 	zlog_info(c, "Rendering Tree into window %p \n", win);
-	RenderTreeIntoWindow(win, tree);
+	RenderTreeIntoWindow(tree);
 	refresh();
 	wrefresh(win);
 
@@ -420,6 +482,10 @@ int main(void)
 		zlog_info(c, "Trapped Keypress  %d", ch );
 		MEVENT event;
 		switch (ch) {
+		case KEY_F(3):
+			zlog_info(c, "F3=> Refresh");
+			RefreshData();
+			break;
 		case KEY_LEFT:
 			zlog_info(c, "Left key");
 			toggleExpand(win, false);
@@ -451,10 +517,12 @@ int main(void)
 
 void toggleExpand(WINDOW* win, bool newState)
 {
-	SetSingleExpansionState(_flat[_selected], newState);
-	RenderTreeIntoWindow(win, tree);
-	wrefresh(win);
-	zlog_info(c, "Expansion state of of %p is %d\n", _flat[_selected], isExpanded(_flat[_selected]));
+	if(_selected > -1){
+		SetSingleExpansionState(_flat[_selected], newState);
+		RenderTreeIntoWindow( tree);
+		wrefresh(win);
+		zlog_info(c, "Expansion state of of %p is %d\n", _flat[_selected], isExpanded(_flat[_selected]));
+	}
 	//LogPrintTree(c, tree, PRINT_ONLY_EXPANDED_NODES);
 
 }
@@ -464,18 +532,18 @@ void moveDown(WINDOW* win)
 	if (_selected - start_row >= WINDOW_SIZE - 1) {
 		start_row++;
 		_selected++;
-		RenderTreeIntoWindow(win, tree);
+		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 		return;
 
 	}
 	if (_selected < (_total_tree_size - 1)) {
 		_selected++;
-		RenderTreeIntoWindow(win, tree);
+		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 	}else{
 		start_row++;
-		RenderTreeIntoWindow(win, tree);
+		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 		zlog_info(c, "At bottom");
 	}
@@ -490,14 +558,14 @@ void moveUp(WINDOW* win)
 	if (_selected - start_row <= 0 ) {
 		start_row--;
 		_selected--;
-		RenderTreeIntoWindow(win, tree);
+		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 		return;
 
 	}
 	if (_selected > 0) {
 		_selected--;
-		RenderTreeIntoWindow(win, tree);
+		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 	}else{
 		zlog_info(c, "At bottom");

@@ -71,12 +71,12 @@ void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth)
 			        ND* item = noderay[i];
 			        AppendChild(root, item);
 			       buildCommentTree(item, noderay, szRaySz, depth + 1);
-			 */
 			printf("%.*s-->%d tx=%s\n",
 			       depth,
 			       "    ",
 			       i,
 			       substring(noderay[i]->text, 30));
+			 */
 			ND* item = noderay[i];
 			AppendChild(root, item);
 			buildCommentTree(item, noderay, szRaySz, depth + 1);
@@ -114,6 +114,9 @@ void MarkParentsExpanded(ND* node)
 
 void SetSingleExpansionState(ND* node, bool expanded)
 {
+	if(node == NULL){
+		return;
+	}
 	if (expanded) {
 		node->flags |= 1 << NODE_EXPANDED;
 	}else{
@@ -123,6 +126,9 @@ void SetSingleExpansionState(ND* node, bool expanded)
 
 void SetExpansionState(ND* node, bool expanded)
 {
+	if(node == NULL){
+		return;
+	}
 	if (expanded)
 		node->flags |= 1 << NODE_EXPANDED;
 	else
@@ -411,7 +417,7 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 			printf("Weird....first segment was zero... %s\n", segs->debugText);
 			exit(0);
 		}
-		printf("[os/%d-id/%d-count/%2d] %s %s \n"
+		printf("[depth=%d-id/%d-count/%2d] %s %s \n"
 		       , offset
 		       , tmp->id
 		       , *counter
@@ -556,6 +562,22 @@ int TotalSize(ND* node)
 		tmp = tmp->next;
 	}
 	return i;
+}
+
+void ResetFlatTree(ND* node)
+{
+	ND* tmp = node;
+
+	if (tmp == NULL) {
+		return;
+	}
+	while (tmp != NULL) {
+		tmp->_ft_depth = 0;
+		if (tmp->children != NULL ) {
+			ResetFlatTree(tmp->children);
+		}
+		tmp = tmp->next;
+	}
 }
 
 ND* FindById(ND* node, int id)
