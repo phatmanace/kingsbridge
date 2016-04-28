@@ -9,6 +9,7 @@
 
 #define OUT_HYL   0
 #define IN_HYL    1
+#define _NS_DEBUG    1
 void _debug(const char* format, ...) { 
 	#ifdef _S_DEBUG
 	    va_list args;
@@ -301,7 +302,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 	strcpy(segs->debugText, "All_is_well");
 
 	char* endString = NULL;
-	char* from[1] = { "&#x27;" };
+	char* from[2] = { "&#x27;", "&quote"};
 	if (strstr(targetstring, from[0]) == NULL) {
 		endString = malloc(strlen(targetstring) + 1);
 		strcpy(endString, targetstring);
@@ -310,9 +311,23 @@ s_segments* splitIntoSegments(char *instr, int width)
 	}else{
 		//printf("Replaced: %s\n", teststr);
 		_debug("Segmentize(): Replaced end string via\n");
-		char* to[1]   = { "'" };
-		endString = searchReplace(targetstring, from, to, 1);
+		char* to[2]   = { "'", "'"};
+		endString = searchReplace(targetstring, from, to, 2);
 	}
+
+	
+
+
+	/*
+
+	if (strstr(endString, from1[1]) != NULL) {
+		endString = malloc(strlen(targetstring) + 1);
+		char* to[1]   = { "'" };
+		char* endString1 = searchReplace(endString, from1, to, 1);
+	}
+
+	*/
+
 
 	// hard coded to 50 strings - this needs sorting...
 	segs->segments = malloc(sizeof(ss_string) * 50);
@@ -320,6 +335,12 @@ s_segments* splitIntoSegments(char *instr, int width)
 
 	int _p = 0;
 	int _l = strlen(endString);
+	for(_p = 0; _p < _l;_p++){
+		if(endString[_p] == 10){
+			endString[_p] = ' ';
+		}
+	}
+	_p = 0;
 	_debug("Segemtize(): Chopping up strings, length is %d \n", _l);
 	_debug("Segmentize(): EndString: %s\n", endString);
 
@@ -332,7 +353,12 @@ s_segments* splitIntoSegments(char *instr, int width)
 	for (_p = 0; _p < _l - 3; _p++) {
 		char otherString[] = "000";
 		memcpy(otherString, endString + _p, 3);
-		if (strcmp(otherString, "<p>") == 0) {
+		if(endString[_p] == 10) {
+			_debug("Segmentize(): Found line break character\n");	
+			 endString[_p] = ' ';
+		}
+		if (strcmp(otherString, "<p>") == 0 ) {
+			_debug("Segmentize(): Found line break character at pos [%d] \n", _p);	
 			pointers[ray_pointer++] = _p;
 		}
 	}
@@ -352,7 +378,6 @@ s_segments* splitIntoSegments(char *instr, int width)
 			) {
 			if (isvalueinarray(_p, pointers, ray_pointer)) {
 				_last_stop = _p;
-
 			}else{
 				_last_stop = _last_wb;
 			}

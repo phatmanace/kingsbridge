@@ -71,7 +71,7 @@ int main()
 			char res[1000];
 			memcpy(res, teststr  + pmatch[0].rm_so, (pmatch[0].rm_eo - pmatch[0].rm_so) );
 			res[(pmatch[0].rm_eo - pmatch[0].rm_so)] = 0;
-			printf("First Match went from %lld to %lld and was %s\n", pmatch[0].rm_so, pmatch[0].rm_eo, res);
+			printf("First Match went from %lld to %lld and was %s\n", (long long int)pmatch[0].rm_so, (long long int)pmatch[0].rm_eo, res);
 
 		}
 	}

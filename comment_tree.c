@@ -56,10 +56,19 @@ void _log(const char* message)
 
 void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth)
 {
+
 	int i = 0;
 
 	for (i = 0; i < 1000; i++) {
 		if (noderay[i] != NULL && noderay[i]->parentid == root->id ) {
+			int _p = 0;
+			int _l = strlen(noderay[i]->text);
+			for(_p = 0; _p < _l;_p++){
+				if(noderay[i]->text[_p] == 10){
+					noderay[i]->text[_p] = ' ';
+				}
+			}
+			_p = 0;
 			/*
 			   printf("%.*s-->%d was %p, id=%d, tx=%s\n",
 			       depth,
@@ -417,6 +426,12 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 			printf("Weird....first segment was zero... %s\n", segs->debugText);
 			exit(0);
 		}
+		int c =0;
+		
+		while(c < strlen(segs->segments[0]->string)){
+			//printf("char at %d (%d) => %c\n", c, (segs->segments[0]->string)[c], (segs->segments[0]->string)[c]);
+			c++;
+		}
 		printf("[depth=%d-id/%d-count/%2d] %s %s \n"
 		       , offset
 		       , tmp->id
@@ -426,7 +441,8 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 		       );
 		if (segs->count > 1) {
 			for (y = 1; y < segs->count; y++) {
-				printf("%40s%s\n",
+				printf("[%d]%40s%s\n",
+					y,
 				       " ",
 				       segs->segments[y]->string
 				       );

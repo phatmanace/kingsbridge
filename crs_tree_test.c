@@ -1,4 +1,6 @@
+#define _GNU_SOURCE 
 #include <ncurses.h>
+#include <stdio.h>
 #include "queue.h"
 #include "comment_tree.h"
 #include "comment_fetch.h"
@@ -25,7 +27,7 @@ zlog_category_t *c;
 int _selected = -1;
 comment_item_tree** _flat = NULL;
 int _total_tree_size = 0;
-int WINDOW_SIZE = 16;
+int WINDOW_SIZE = 26;
 int start_row = 0;
 char *msg1 = NULL;
 int mode = MODE_NORMAL;
@@ -175,12 +177,26 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 
 	wmove(win, *row, basecolumn - 3);  wprintw(win, "%d", *row);
 	if (node->children != NULL && !isExpanded(node)) {
-		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "%s (%d)", substring(node->text, 10), TotalSize(node->children));
+		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "(%d) %s",  TotalSize(node->children), substring(node->text, 60));
 	}else{
-		wmove(win, *row, column + SPLINE_COL);  wprintw(win, substring(node->text, 30));
+		wmove(win, *row, column + SPLINE_COL);  wprintw(win, substring(node->text, 60));
 	}
 	wattron(win, COLOR_PAIR(3));
-	wmove(win, *row, 55); wprintw(win, "cc=%4d  d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
+	wmove(win, *row, 85); wprintw(win, "cc=%4d  d=%4d ",
+				      ChildCount(node, false),
+				      node->_ft_depth
+				      );
+	wattroff(win, COLOR_PAIR(3));
+	// deactivate colors
+	if (rowindex == _selected) {
+		wattroff(win, COLOR_PAIR(2));
+	}
+
+	zlog_info(c, "Done Rendering Leaving..");
+	(*row)++;
+
+	wattron(win, COLOR_PAIR(3));
+	wmove(win, 2, 55); wprintw(win, "cc=%4d  d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
 				      ChildCount(node, false),
 				      node->_ft_depth,
 				      _total_tree_size,
@@ -193,13 +209,6 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 
 				      );
 	wattroff(win, COLOR_PAIR(3));
-	// deactivate colors
-	if (rowindex == _selected) {
-		wattroff(win, COLOR_PAIR(2));
-	}
-
-	zlog_info(c, "Done Rendering Leaving..");
-	(*row)++;
 }
 
 void DrawBox(WINDOW* win, int height, int width, int starty, int startx, bool isFirst, bool isLast)
@@ -291,11 +300,12 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	}
 
 
+	mvwhline(win, 4 + WINDOW_SIZE + 1,  1, ACS_HLINE, COLS  );
 
-	int _text_start = 24;
+	int _text_start = (int)(LINES/2);
 	if(_selected > -1){
 		row = _text_start;
-		while (row < 39) {
+		while (row < LINES - 2) {
 			wmove(win, row, 2);  wprintw(win, "%*s", 120, "");
 			row++;
 		}
@@ -482,6 +492,12 @@ int main(void)
 		zlog_info(c, "Trapped Keypress  %d", ch );
 		MEVENT event;
 		switch (ch) {
+		case KEY_RESIZE:
+			zlog_info(c, "Resize()");
+			RenderTreeIntoWindow(tree);
+			refresh();
+			wrefresh(win);
+			break;
 		case KEY_F(3):
 			zlog_info(c, "F3=> Refresh");
 			RefreshData();
