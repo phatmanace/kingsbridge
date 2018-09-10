@@ -1,5 +1,7 @@
 *.swp
+*.o
 comment_test.dSYM/Contents/Resources/DWARF/comment_test
 curses_demo.dSYM/
 bin/
+tbin/
 cscope.out
