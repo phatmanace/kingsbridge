@@ -57,7 +57,6 @@ void DrawBox(WINDOW* win, int height, int width, int starty, int startx, bool is
 
 	wmove(win, starty + 1, startx + 2);  //wprintw(win, "%d,%d,%d", startx, starty, (starty % 3));
 
-
 	if (isFirst) {
 		wmove(win, starty, startx); waddch(win, ACS_ULCORNER);
 		wmove(win, starty + height - 1, startx); waddch(win, ACS_LLCORNER);
@@ -69,10 +68,7 @@ void DrawBox(WINDOW* win, int height, int width, int starty, int startx, bool is
 		wmove(win, starty, startx + width); waddch(win, ACS_URCORNER);
 		wmove(win, starty + height - 1, startx + width); waddch(win, ACS_LRCORNER);
 		mvwvline(win, starty + 1, width + startx, ACS_VLINE, height - 2 );
-
 	}
-
-
 }
 
 
@@ -95,6 +91,20 @@ void RefreshData(){
 	wrefresh(win);
 }
 
+void *barrelShiftArray(void* _strings){
+	char** strings = (char**)_strings;
+
+	for(int x = 0; x < 1000;x++){
+		usleep(1000000);
+		for(int i = 0;i < 100;i++){
+			sprintf(strings[i], "not_a_test %d", x);
+		}
+		zlog_info(c, "Sleeping... ");
+	}
+
+	return NULL;
+}
+
 
 int main(void)
 {
@@ -111,14 +121,30 @@ int main(void)
 		return -1;
 	}
 
+	pthread_t thread;
 
+
+
+	char** strings = malloc(sizeof(char*) * 100);
+
+	for(int x = 0;x < 100;x++){
+		strings[x] = malloc(sizeof(char) * 10);
+		sprintf(strings[x], "test %d", x);
+	}
+	pthread_create(&thread, NULL, barrelShiftArray, strings);
+
+
+	for(int x = 0;x < 100;x++){ zlog_info(c, "%s", strings[x]);}
+
+	for(int x = 0;x < 100;x++){
+		sprintf(strings[x], "not_a_test %d", x);
+	}
+
+	for(int x = 0;x < 100;x++){ zlog_info(c, "%s", strings[x]);}
 
 
 	zlog_info(c, "Program starting... ");
 
-	for(int z=0;z < 100;z++){
-		zlog_info(c, "Array mod of %d is %d", z, z % 30);
-	}
 
 	zlog_info(c, "Sample Fast Window App");
 	SetExpansionState(tree, TRUE);
