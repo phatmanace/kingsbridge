@@ -83,12 +83,15 @@ void RefreshData(){
 	wrefresh(win);
 	mode = MODE_NORMAL;
 	refresh();
+	
+	int h = 40;
+	int w = 35;
 
-	DrawBox(win, 10, 10,1,1,true, true);
+	DrawBox(win, h, w,1,1,true, true);
 	wattron(win, COLOR_PAIR(1));
-	DrawBox(win, 10, 10,1,12,true, true);
+	DrawBox(win, h, w,1,2 + w,true, true);
 	wattron(win, COLOR_PAIR(2));
-	DrawBox(win, 10, 10,1,23,true, true);
+	DrawBox(win, h, w,1,3 + (2 * w),true, true);
 	wrefresh(win);
 }
 
@@ -99,7 +102,7 @@ int main(void)
 
 	l_init = zlog_init("/etc/zlog.conf");
 	if (l_init) {
-		printf("logging init failed");
+		printf("logging init failed\n");
 		return -1;
 	}
 	c = zlog_get_category("hngui");
@@ -112,15 +115,9 @@ int main(void)
 
 
 	zlog_info(c, "Program starting... ");
-	DIR           *d;
-	struct dirent *dir;
-	d = opendir("/var/tmp");
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			zlog_info(c, "%s", dir->d_name);
-		}
 
-		closedir(d);
+	for(int z=0;z < 100;z++){
+		zlog_info(c, "Array mod of %d is %d", z, z % 30);
 	}
 
 	zlog_info(c, "Sample Fast Window App");
