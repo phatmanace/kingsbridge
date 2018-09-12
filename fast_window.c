@@ -33,6 +33,12 @@ char *msg1 = NULL;
 int mode = MODE_NORMAL;
 WINDOW* win;
 
+typedef struct{
+	char** stringset;
+	int index;
+
+}targ;
+
 pthread_mutex_t lock;
 
 comment_item_tree* tree = NULL;
@@ -91,15 +97,24 @@ void RefreshData(){
 	wrefresh(win);
 }
 
-void *barrelShiftArray(void* _strings){
-	char** strings = (char**)_strings;
+void *barrelShiftArray(void* _args){
+
+	
+	char** strings = ((targ*)_args)->stringset;
 
 	for(int x = 0; x < 1000;x++){
-		usleep(1000000);
-		for(int i = 0;i < 100;i++){
-			sprintf(strings[i], "not_a_test %d", x);
+		usleep(300000);
+		for(int i = 0;i < 39;i++){
+			wattron(win, COLOR_PAIR(1));
+			mvwprintw(win, 2 + i, 2, strings[(10 + i + x ) % 100]);
+			wattron(win, COLOR_PAIR(2));
+			mvwprintw(win, 2 + i, 38, strings[(14 + i + x ) % 100]);
+			wattron(win, COLOR_PAIR(1));
+			mvwprintw(win, 2 + i, 74, strings[(18 + i + x ) % 100]);
+			wattron(win, COLOR_PAIR(0));
 		}
 		zlog_info(c, "Sleeping... ");
+		RefreshData();
 	}
 
 	return NULL;
@@ -109,6 +124,8 @@ void *barrelShiftArray(void* _strings){
 int main(void)
 {
 	int l_init = 0;
+	srand(time(NULL));
+	
 
 	l_init = zlog_init("/etc/zlog.conf");
 	if (l_init) {
@@ -129,18 +146,15 @@ int main(void)
 
 	for(int x = 0;x < 100;x++){
 		strings[x] = malloc(sizeof(char) * 10);
-		sprintf(strings[x], "test %d", x);
-	}
-	pthread_create(&thread, NULL, barrelShiftArray, strings);
-
-
-	for(int x = 0;x < 100;x++){ zlog_info(c, "%s", strings[x]);}
-
-	for(int x = 0;x < 100;x++){
-		sprintf(strings[x], "not_a_test %d", x);
+		sprintf(strings[x], "test %d", rand());
 	}
 
-	for(int x = 0;x < 100;x++){ zlog_info(c, "%s", strings[x]);}
+	targ b_shift_args;
+	b_shift_args.stringset = strings;
+	b_shift_args.index = 0;
+	pthread_create(&thread, NULL, barrelShiftArray, &b_shift_args);
+
+
 
 
 	zlog_info(c, "Program starting... ");
