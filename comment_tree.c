@@ -315,7 +315,7 @@ void LogPrintTreeItem(zlog_category_t* c, const ND* node, int offset, int *count
 			}
 		}
 		if (method == PRINT_ALL_TREE || isExpanded(tmp)) {
-			zlog_info(c, "%d[dp/%d - %5d] %s %d (i=%d) F/%d) -> %25s %p, %p, %p"
+			zlog_info(c, "CT{PAT}%d[dp/%d - %5d] %s %d (i=%d) F/%d) -> %25s %p, %p, %p"
 				  , isExpanded(tmp)
 				  , offset
 				  , *counter
