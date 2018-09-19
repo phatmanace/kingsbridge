@@ -5,3 +5,4 @@ curses_demo.dSYM/
 bin/
 tbin/
 cscope.out
+ll_test_queue.d
