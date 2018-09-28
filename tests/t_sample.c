@@ -1,5 +1,5 @@
 
-#include "comment_tree.h"
+#include "../comment_tree.h"
 #include "t_sample.h"
 #include <stdio.h>
 #include <stdlib.h>

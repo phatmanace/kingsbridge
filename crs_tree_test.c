@@ -17,8 +17,10 @@
 #define _TS_CURSES_DEBUG 1
 #define MODE_NORMAL 0
 #define MODE_LOADING 1
-#define BAD_HN_ARTICLE 11569726
-#define HN_ARTICLE 11569857
+#define SMALL_HN_ARTICLE 18065567
+#define BIG_HN_ARTICLE 18063893
+#define BAD_HN_ARTICLE 18063893
+#define HN_ARTICLE SMALL_HN_ARTICLE
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 
@@ -42,7 +44,7 @@ void moveDown(WINDOW* win);
 void moveUp(WINDOW* win);
 void toggleExpand(WINDOW* win, bool newState);
 
-void blip(int level, char* format, ...){
+void DrawingCallback(int level, char* format, ...){
 
 	#ifdef _TS_CURSES_DEBUG 
 	va_list args;
@@ -250,7 +252,7 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	zlog_info(c, "Rendering window %dX%d", win->_maxy, win->_maxx);
 	wbkgd(win, COLOR_PAIR(1));
 	refresh();
-	wmove(win, 2, 1);
+	wmove(win, 1, 1);
 	//wattron(win, A_BOLD | A_BLINK);
 	wattron(win,  A_BOLD);
 	wattron(win, COLOR_PAIR(2));
@@ -258,13 +260,12 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	if(mode == MODE_LOADING){
 		wprintw(win, "Loading in articles...one moment please  ");
 	}else{
-		wprintw(win, "News Comments for article ( %d in total) ", TotalSize(tree) );
+		wprintw(win, "(%d/%d) - News Comments for article ( %d in total) ", WINDOW_SIZE, LINES, TotalSize(tree) );
 	}
+	wmove(win, 0,  COLS - 10 );
+	wprintw(win, "[Foo]");
 	wattroff(win, COLOR_PAIR(2));
-
 	wattroff(win, A_BOLD);
-
-
 
 	int row = 4;
 	while (row < 30) {
@@ -276,6 +277,9 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 		wprintw(win, "%s", msg1);
 	}
 
+
+	/* What does 4 mean?
+	 */
 	row = 4;
 	int txcol = 7;
 	if(_flat != NULL){
@@ -285,6 +289,11 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	_flat = ToFlatTree(tree, &_total_tree_size);
 
 	zlog_info(c, "Rendering total of  %d rows", _total_tree_size);
+
+	/* Render entire Tree into Window
+	 * Idea is to stop at the end of the display panel
+	 * Or the end of the article list, which ever we hit sooner
+	 */
 
 	while (true) {
 		if ( (row - 4) == _total_tree_size || (row - 4) >= WINDOW_SIZE) {
@@ -300,9 +309,16 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	}
 
 
-	mvwhline(win, 4 + WINDOW_SIZE + 1,  1, ACS_HLINE, COLS  );
+	// Horizontal Dividing line between tree and Text.. 
+	mvwhline(win,  WINDOW_SIZE ,  1, ACS_HLINE, COLS  );
+	wmove(win, 100, WINDOW_SIZE + 2); waddch(win, ACS_RTEE);
 
 	int _text_start = (int)(LINES/2);
+
+	/* If the user has selected an article, then
+	 * Actually Render the text that we want to see on the window
+	 */
+
 	if(_selected > -1){
 		row = _text_start;
 		while (row < LINES - 2) {
@@ -330,26 +346,6 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 		wprintw(win, "%s", msg1);
 	}
 
-	/*
-
-	int BOX_W = 11;
-	int BOX_H = 3;
-	int _stx = 1;
-	int _sty = 21;
-
-
-	while (_sty < 35) {
-		while (_stx < 120) {
-			//wattron(win, A_BOLD | A_BLINK);
-			DrawBox(win, BOX_H, BOX_W,  _sty, _stx, _stx == 1, _stx > 68);
-			//wattroff(win, A_BOLD | A_BLINK);
-			_stx += BOX_W;
-		}
-		_sty += BOX_H;
-		_stx = 1;
-	}
-
-	*/
 
 }
 
@@ -369,7 +365,7 @@ ND* BuildTree()
 	struct thread_args* args = malloc(sizeof(struct thread_args));;
 	args->count = &article_count;
 	args->queue = queue;
-	args->callback = &blip;
+	args->callback = &DrawingCallback;
 	args->tcount = 0;
 	args->error_code = 0;
 	args->noderay = allocNodeArray(1000);
@@ -455,6 +451,9 @@ int main(void)
 	LogPrintTree(c, tree, PRINT_ONLY_EXPANDED_NODES);
 	zlog_info(c, "Tree Size: %d\n", TotalSize(tree));
 	initscr();
+
+	WINDOW_SIZE=(int)(LINES/2);
+
 	mousemask(ALL_MOUSE_EVENTS, NULL);
 	cbreak();
 	noecho();

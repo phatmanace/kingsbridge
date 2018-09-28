@@ -1,7 +1,17 @@
 SOLIB := solib
+LD_LIB := -lzlog -lncurses
 
-all: solib bin tbin ${SOLIB}/comment_tree.o ${SOLIB}/queue.o ${SOLIB}/downloader.o ${SOLIB}/string_utils.o bin/ll_sort_test ${SOLIB}/comment_fetch.o bin/comment_test bin/comment_demo bin/curses_tree ll_test_queue.d tbin/t_curses_multi_test tbin/t_patt_test tbin/t_micro_test bin/fastwindow
+all: solib
+all: bin tbin comment_tree.o queue.o downloader.o
+all: string_utils.o comment_fetch.o
+all: ltestqueue.o
+all: bin/comment_demo bin/curses_tree
 
+include Makefile.dep
+.phony: all
+
+
+SILENTCC = @printf '%b %b' ${CC}
 
 
 bin:
@@ -11,38 +21,18 @@ tbin:
 solib:
 	mkdir  ${SOLIB}
 
-${SOLIB}/comment_tree.o: comment_tree.c string_utils.o
-	${CC} ${INC}  -g -o ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o  -c comment_tree.c ${COPTS}
-${SOLIB}/string_utils.o: string_utils.c
-	${CC} ${INC}  -g -o ${SOLIB}/string_utils.o  -c string_utils.c ${COPTS}
-${SOLIB}/t_sample.o: t_sample.c
-	${CC} ${INC}  -g -o ${SOLIB}/t_sample.o  -c t_sample.c ${COPTS}
-${SOLIB}/queue.o: queue.c
-	${CC} ${INC}  -g -o ${SOLIB}/queue.o  -c queue.c ${COPTS} ${CFLAGS}
-${SOLIB}/downloader.o: downloader.c
-	${CC} ${INC} -g -o ${SOLIB}/downloader.o  -c downloader.c ${COPTS} -Wno-nonnull
-${SOLIB}/comment_fetch.o: comment_fetch.c
-	${CC} ${INC} -g -o ${SOLIB}/comment_fetch.o  -c comment_fetch.c ${COPTS} -Wno-nonnull
-bin/comment_test: comment_tester.c ${SOLIB}/t_sample.o ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o
-	${CC} ${INC} -g -o bin/comment_test    comment_tester.c  ${SOLIB}/t_sample.o ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o  ${LIB} ${COPTS} -lzlog
-ll_test_queue.d: l_test_queue.c ${SOLIB}/queue.o
-	${CC} -pthread -MM -MF ll_test_queue.d  -g -o bin/ll_test_queue    l_test_queue.c  ${SOLIB}/queue.o  ${INC} ${LIB} ${COPTS} 
-tbin/t_curses_multi_test: t_curses_multi_test.c ${SOLIB}/queue.o ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o ${SOLIB}/downloader.o
-	${CC} -pthread -g -o tbin/t_curses_multi_test  t_curses_multi_test.c ${SOLIB}/string_utils.o ${SOLIB}/comment_tree.o ${SOLIB}/downloader.o  ${SOLIB}/queue.o  ${INC} ${LIB} ${COPTS}  -lcurl -lyajl -Wno-nonnull -lzlog -ljansson -lcjson -lm
-bin/comment_demo: curses_sampler.c 
-	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} -lzlog -lncurses
-bin/curses_tree: crs_tree_test.c ${SOLIB}/t_sample.o ${SOLIB}/comment_fetch.o  ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o ${SOLIB}/downloader.o ${SOLIB}/queue.o
-	${CC} -pthread -g -o bin/curses_tree   crs_tree_test.c ${SOLIB}/t_sample.o ${SOLIB}/comment_fetch.o ${SOLIB}/string_utils.o ${SOLIB}/downloader.o ${SOLIB}/queue.o ${SOLIB}/comment_tree.o \
+
+%.o: %.c
+	 ${CC} -c $<
+
+bin/comment_demo: curses_sampler.c
+	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+
+bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
+	${CC} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
 			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
-bin/fastwindow: fast_window.c ${SOLIB}/t_sample.o ${SOLIB}/comment_fetch.o  ${SOLIB}/comment_tree.o ${SOLIB}/string_utils.o ${SOLIB}/downloader.o ${SOLIB}/queue.o
-	${CC} -pthread -g -o bin/fastwindow   fast_window.c ${SOLIB}/t_sample.o ${SOLIB}/comment_fetch.o ${SOLIB}/string_utils.o ${SOLIB}/downloader.o ${SOLIB}/queue.o ${SOLIB}/comment_tree.o \
-			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
-bin/ll_sort_test: ll_sort_test.c
-	${CC}  -g -o bin/ll_sort_test  -c ll_sort_test.c ${COPTS}
-tbin/t_patt_test: t_pattern_test.c ${SOLIB}/string_utils.o  
-	${CC}  -g -o tbin/t_patt_test string_utils.o  t_pattern_test.c ${COPTS}
-tbin/t_micro_test: t_micro_test.c ${SOLIB}/string_utils.o  
-	${CC}  -g -o tbin/t_micro_test string_utils.o  t_micro_test.c ${COPTS}
+.phony: clean
+
 clean:
 	-rm -fr solab *.o bin/comment_test bin/curses_tree bin/ll_sort_test bin/l_test_queue* bin/*dSYM bin/comment_demo bin/curses_tree* tbin/t_patt_test bin/t_curses_multi_test *dSYM* tbin *.d
-	
+
