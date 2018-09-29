@@ -1,0 +1,25 @@
+cmoka.o: cmoka.c hnarticle.h hnfetcher.h
+comment_fetch.o: comment_fetch.c hnarticle.h hnfetcher.h downloader.h \
+  queue.h comment_tree.h string_utils.h
+comment_tester.o: comment_tester.c comment_tree.h t_sample.h
+comment_tree.o: comment_tree.c comment_tree.h string_utils.h
+crs_tree_test.o: crs_tree_test.c queue.h comment_tree.h comment_fetch.h \
+  t_sample.h downloader.h string_utils.h
+curses_sampler.o: curses_sampler.c
+downloader.o: downloader.c downloader.h queue.h comment_tree.h \
+  string_utils.h
+fast_window.o: fast_window.c queue.h comment_tree.h comment_fetch.h \
+  t_sample.h downloader.h string_utils.h
+grabber.o: grabber.c hnarticle.h hnfetcher.h
+hnfetcher.o: hnfetcher.c hnarticle.h hnfetcher.h
+ll_sort_test.o: ll_sort_test.c
+ltestqueue.o: ltestqueue.c queue.h
+md5example.o: md5example.c
+parse_config.o: parse_config.c
+queue.o: queue.c queue.h
+sha256_example.o: sha256_example.c
+string_utils.o: string_utils.c string_utils.h
+t_curses_multi_test.o: t_curses_multi_test.c queue.h comment_tree.h \
+  string_utils.h downloader.h
+t_micro_test.o: t_micro_test.c string_utils.h
+t_pattern_test.o: t_pattern_test.c string_utils.h

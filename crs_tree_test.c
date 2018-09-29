@@ -263,7 +263,7 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 		wprintw(win, "(%d/%d) - News Comments for article ( %d in total) ", WINDOW_SIZE, LINES, TotalSize(tree) );
 	}
 	wmove(win, 0,  COLS - 10 );
-	wprintw(win, "[Foo]");
+	wprintw(win, "[%d]", COLS);
 	wattroff(win, COLOR_PAIR(2));
 	wattroff(win, A_BOLD);
 
@@ -296,7 +296,7 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	 */
 
 	while (true) {
-		if ( (row - 4) == _total_tree_size || (row - 4) >= WINDOW_SIZE) {
+		if ( (row - 4) == _total_tree_size || (row) >= WINDOW_SIZE) {
 			break;
 		}
 		int chosen_element = MAX(row + start_row - 4, 0);
@@ -311,9 +311,9 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 
 	// Horizontal Dividing line between tree and Text.. 
 	mvwhline(win,  WINDOW_SIZE ,  1, ACS_HLINE, COLS  );
-	wmove(win, 100, WINDOW_SIZE + 2); waddch(win, ACS_RTEE);
+	wmove(win,  WINDOW_SIZE , 222); waddch(win, ACS_RTEE);
 
-	int _text_start = (int)(LINES/2);
+	int _text_start = (int)(LINES/2) + 2;
 
 	/* If the user has selected an article, then
 	 * Actually Render the text that we want to see on the window
