@@ -47,6 +47,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
    args->callback(2, "[T:%u] %s Queue size:%-4d", self,  url, QSize(args->queue));
    curl_easy_setopt(curl, CURLOPT_URL, url);
    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, BuildJSONString);
    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);

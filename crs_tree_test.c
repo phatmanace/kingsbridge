@@ -39,10 +39,15 @@ pthread_mutex_t lock;
 
 comment_item_tree* tree = NULL;
 WINDOW *create_newwin(int height, int width, int starty, int startx);
+void destroy_win(WINDOW *local_win);
 void RenderTreeIntoWindow(comment_item_tree* tree);
 void moveDown(WINDOW* win);
 void moveUp(WINDOW* win);
 void toggleExpand(WINDOW* win, bool newState);
+
+typedef struct{
+	int startx, starty, width, height;
+}window_info;
 
 void DrawingCallback(int level, char* format, ...){
 
@@ -311,7 +316,7 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 
 	// Horizontal Dividing line between tree and Text.. 
 	mvwhline(win,  WINDOW_SIZE ,  1, ACS_HLINE, COLS  );
-	wmove(win,  WINDOW_SIZE , 222); waddch(win, ACS_RTEE);
+	wmove(win,  WINDOW_SIZE , COLS - 3); waddch(win, ACS_RTEE);
 
 	int _text_start = (int)(LINES/2) + 2;
 
@@ -415,6 +420,12 @@ void RefreshData(){
 	wrefresh(win);
 }
 
+void ResetWindowInfo(window_info* info){
+	info->height = LINES - 2;
+	info->width  = COLS - 2;
+	info->starty = (LINES - info->height) / 4;  /* Calculating for a center placement */
+	info->startx = (COLS - info->width) / 2;    /* of */
+}
 
 int main(void)
 {
@@ -467,13 +478,11 @@ int main(void)
 	init_pair(3, COLOR_YELLOW, COLOR_BLUE);
 	init_pair(4, COLOR_RED, COLOR_BLUE);
 
-	int startx, starty, width, height;
-	height = LINES - 2;
-	width  = COLS - 2;
-	starty = (LINES - height) / 4;  /* Calculating for a center placement */
-	startx = (COLS - width) / 2;    /* of */
+	window_info w_info;
+	ResetWindowInfo(&w_info);
+	
 	refresh();
-	win = create_newwin(height, width, starty, startx);
+	win = create_newwin(w_info.height, w_info.width, w_info.starty, w_info.startx);
 	if (win == NULL) {
 		zlog_info(c, "Window Was null...\n");
 		endwin();
@@ -493,6 +502,9 @@ int main(void)
 		switch (ch) {
 		case KEY_RESIZE:
 			zlog_info(c, "Resize()");
+			destroy_win(win);
+			ResetWindowInfo(&w_info);
+			win = create_newwin(w_info.height, w_info.width, w_info.starty, w_info.startx);
 			RenderTreeIntoWindow(tree);
 			refresh();
 			wrefresh(win);
@@ -598,4 +610,27 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 	wrefresh(local_win);                    /* Show that box                */
 
 	return local_win;
+}
+
+void destroy_win(WINDOW *local_win)
+{	
+	/* box(local_win, ' ', ' '); : This won't produce the desired
+	 * result of erasing the window. It will leave it's four corners 
+	 * and so an ugly remnant of window. 
+	 */
+	zlog_info(c, "Destroying Window...");
+	wborder(local_win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
+	/* The parameters taken are 
+	 * 1. win: the window on which to operate
+	 * 2. ls: character to be used for the left side of the window 
+	 * 3. rs: character to be used for the right side of the window 
+	 * 4. ts: character to be used for the top side of the window 
+	 * 5. bs: character to be used for the bottom side of the window 
+	 * 6. tl: character to be used for the top left corner of the window 
+	 * 7. tr: character to be used for the top right corner of the window 
+	 * 8. bl: character to be used for the bottom left corner of the window 
+	 * 9. br: character to be used for the bottom right corner of the window
+	 */
+	wrefresh(local_win);
+	delwin(local_win);
 }
