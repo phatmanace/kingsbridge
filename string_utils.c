@@ -252,6 +252,9 @@ s_segments* _blankSeg()
 	return segs;
 
 }
+/**
+* split a string into segments... 
+**/
 s_segments* splitIntoSegments(char *instr, int width)
 {
 	if (instr == NULL) {
@@ -283,7 +286,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 				_debug( "Too Wide...  %s, len=%zu, width=%d\n", token, strlen(token), width );
 			}else{
 				ok_strings++;
-				//_debug("concat(): %s\n", token);
+				_debug("concat(): %s\n", token);
 				strcat(targetstring, space);
 				strcat(targetstring, token);
 			}
@@ -302,8 +305,8 @@ s_segments* splitIntoSegments(char *instr, int width)
 	strcpy(segs->debugText, "All_is_well");
 
 	char* endString = NULL;
-	char* from[2] = { "&#x27;", "&quote"};
-	if (strstr(targetstring, from[0]) == NULL) {
+	char* from[3] = { "&#x27;", "&quote", "&gt"};
+	if (strstr(targetstring, from[0]) == NULL ) {
 		endString = malloc(strlen(targetstring) + 1);
 		strcpy(endString, targetstring);
 		_debug("Skipping search replace\n");
@@ -311,8 +314,8 @@ s_segments* splitIntoSegments(char *instr, int width)
 	}else{
 		//printf("Replaced: %s\n", teststr);
 		_debug("Segmentize(): Replaced end string via\n");
-		char* to[2]   = { "'", "'"};
-		endString = searchReplace(targetstring, from, to, 2);
+		char* to[3]   = { "'", "'", ">"};
+		endString = searchReplace(targetstring, from, to, 3);
 	}
 
 	

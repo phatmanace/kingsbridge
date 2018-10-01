@@ -17,7 +17,7 @@
 #define _TS_CURSES_DEBUG 1
 #define MODE_NORMAL 0
 #define MODE_LOADING 1
-#define SMALL_HN_ARTICLE 18065567
+#define SMALL_HN_ARTICLE 18113926
 #define BIG_HN_ARTICLE 18063893
 #define BAD_HN_ARTICLE 18063893
 #define HN_ARTICLE SMALL_HN_ARTICLE
@@ -189,8 +189,9 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 		wmove(win, *row, column + SPLINE_COL);  wprintw(win, substring(node->text, 60));
 	}
 	wattron(win, COLOR_PAIR(3));
-	wmove(win, *row, 85); wprintw(win, "cc=%4d  d=%4d ",
+	wmove(win, *row, 85); wprintw(win, "cc=%3d cc=%3d d=%4d ",
 				      ChildCount(node, false),
+				      ChildCount(node, true),
 				      node->_ft_depth
 				      );
 	wattroff(win, COLOR_PAIR(3));
@@ -203,8 +204,9 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 	(*row)++;
 
 	wattron(win, COLOR_PAIR(3));
-	wmove(win, 2, 55); wprintw(win, "cc=%4d  d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
+	wmove(win, 2, 55); wprintw(win, "cc=%3d tcc=%3d d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
 				      ChildCount(node, false),
+				      ChildCount(node, true),
 				      node->_ft_depth,
 				      _total_tree_size,
 				      _selected,

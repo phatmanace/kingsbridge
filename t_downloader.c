@@ -53,4 +53,5 @@ int main(void){
 		return 1;
 	}
 	downloadSingle(curl);
+	curl_easy_cleanup(curl);
 }
