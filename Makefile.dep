@@ -21,5 +21,7 @@ sha256_example.o: sha256_example.c
 string_utils.o: string_utils.c string_utils.h
 t_curses_multi_test.o: t_curses_multi_test.c queue.h comment_tree.h \
   string_utils.h downloader.h
+t_downloader.o: t_downloader.c downloader.h queue.h comment_tree.h \
+  string_utils.h
 t_micro_test.o: t_micro_test.c string_utils.h
 t_pattern_test.o: t_pattern_test.c string_utils.h

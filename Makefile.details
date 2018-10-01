@@ -1,11 +1,11 @@
 SOLIB := solib
-LD_LIB := -lzlog -lncurses
+LD_LIB := -lzlog -lncurses -lcurl
 
 all: solib
-all: bin tbin comment_tree.o queue.o downloader.o
+all: bin tbin comment_tree.o queue.o downloader.o t_downloader.o
 all: string_utils.o comment_fetch.o
 all: ltestqueue.o
-all: bin/comment_demo bin/curses_tree
+all: bin/comment_demo bin/curses_tree bin/t_downloader
 
 include Makefile.dep
 .phony: all
@@ -27,6 +27,9 @@ solib:
 
 bin/comment_demo: curses_sampler.c
 	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+
+bin/t_downloader: t_downloader.c
+	${CC} -g -o bin/t_downloader   t_downloader.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
 	${CC} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
