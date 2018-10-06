@@ -400,7 +400,7 @@ ND* BuildTree()
 			    (double)(tv2.tv_sec - tv1.tv_sec);
 	zlog_info(c, "Downloaded articles in %lf Seconds", time_spent);
 
-	ND* root = newCommentTreeNodeWithText( "Article Header would go here", id);
+	ND* root = nCmmtText( "Article Header would go here", id);
 	buildCommentTree(root, args->noderay, 1000, 0);
 	free(args);
 	return root;

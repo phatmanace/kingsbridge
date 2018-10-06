@@ -416,7 +416,7 @@ s_segments* splitIntoSegments(char *instr, int width)
 	sl->length = strlen(sl->string);
 	segs->segments[segs->count] = sl;
 	segs->count++;
-	//free(targetstring);
+	free(targetstring);
 	free(pointers);
 	_debug("Segementize(): done with segmentization\n");
 	return segs;

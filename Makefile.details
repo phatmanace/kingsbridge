@@ -6,6 +6,7 @@ all: bin tbin comment_tree.o queue.o downloader.o t_downloader.o
 all: string_utils.o comment_fetch.o
 all: ltestqueue.o
 all: bin/comment_demo bin/curses_tree bin/t_downloader
+all: tbin/t_simple_comment_test
 
 include Makefile.dep
 .phony: all
@@ -36,6 +37,9 @@ solib:
 
 bin/comment_demo: curses_sampler.c
 	${KBLNK} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+
+tbin/t_simple_comment_test: comment_tester.c comment_tree.c string_utils.c
+	${KBLNK} -g -o tbin/t_simple_comment_test   comment_tester.c comment_tree.o string_utils.o  ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/t_downloader: t_downloader.c
 	${KBLNK} -g -o bin/t_downloader   t_downloader.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}

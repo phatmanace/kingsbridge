@@ -21,11 +21,13 @@ typedef struct ND {
 	int flags;
 	int id;
 	int parentid;
+	long creationTime;
 	int _ft_depth;
 } ND;
 
-ND* newCommentTreeNode(int id);
-ND* newCommentTreeNodeWithText(char* text, int id);
+ND* nCmmt(int id);
+ND* nCmmtText(char* text, int id);
+ND* nCmmtTextTime(char* text, int id, long time);
 
 int  SiblingCount(const ND* node);
 void ResetFlatTree(ND* node);
@@ -52,6 +54,7 @@ void SetSingleExpansionState(ND* node, bool expanded);
 ND **ToFlatTree(ND *node, int* n);
 int ComputedDepth(ND* node);
 void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth);
+void TreeFree(ND* node);
 
 #define NODE_EXPANDED 1
 #define NODE_LOCATED  2

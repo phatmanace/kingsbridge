@@ -5,6 +5,7 @@
 #include <string.h>
 #include "zlog.h"
 #include "string_utils.h"
+#include "t_sample.h"
 
 
 void LogPrintTreeItem(zlog_category_t* c,
@@ -16,7 +17,7 @@ void LogPrintTreeItem(zlog_category_t* c,
 /*
  * Create new comment node with nothing
  */
-ND* newCommentTreeNode(int id)
+ND* nCmmt(int id)
 {
 	ND* item = malloc(sizeof(ND));
 
@@ -25,28 +26,36 @@ ND* newCommentTreeNode(int id)
 		return NULL;
 	}
 
-	item->children = NULL;
-	item->next     = NULL;
-	item->previous = NULL;
-	item->parent   = NULL;
-	item->flags    = 0;
-	item->id       = id;
-	item->parentid = 0;
-	item->_ft_depth = 0;
-	item->text      = NULL;
-	item->links     = NULL;
-	item->linkcount = 0;
+	item->children     = NULL;
+	item->next         = NULL;
+	item->previous     = NULL;
+	item->parent       = NULL;
+	item->flags        = 0;
+	item->creationTime = 0L;
+	item->id           = id;
+	item->parentid     = 0;
+	item->_ft_depth    = 0;
+	item->text         = NULL;
+	item->links        = NULL;
+	item->linkcount     = 0;
 	SetSingleExpansionState(item, false);
 	return item;
 }
 
-ND* newCommentTreeNodeWithText(char* text, int id)
+ND* nCmmtText(char *text, int id)
 {
-	ND* item = newCommentTreeNode(id);
-
-	item->text       = malloc(strlen(text));
-	strcpy(item->text, text);
+	ND* item = nCmmt(id);
+	item->text       = strdup(text);
 	return item;
+}
+
+ND* nCmmtTextTime(char *text, int id, long time)
+{
+    ND* item = nCmmt(id);
+    item->text       = strdup(text);
+    item->creationTime = time;
+    //printf("Creatinon time was %ld\n", item->creationTime);
+    return item;
 }
 
 void _log(const char* message)
@@ -57,7 +66,6 @@ void _log(const char* message)
 
 void buildCommentTree(ND* root, ND** noderay, int szRaySz, int depth)
 {
-
 	int i = 0;
 
 	for (i = 0; i < 1000; i++) {
@@ -391,33 +399,7 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 				y++;
 			}
 		}
-		/*
-		   printf("[%d] %s %d(%10p,nx=%10p, prev=%10p,Parent=%10p,F/%d) -> %30s (CC=%d)\n"
-		                                              , offset
-		                                              , prefix
-		                                              , isExpanded(tmp)
-		                                              , tmp
-		                                              , tmp->next
-		                                              , tmp->previous
-		                                              , tmp->parent
-		                                              , tmp->flags
-		                                              , tmp->text
-		                                              ,ChildCount(tmp, false)
-		                                                );
-		   printf("[%d - %d -  %2d] %s %-25s TS=%4d (id=%d) F=%d) (CC_nr=%d, CC_R=%d, T=%d)\n"
-		       , offset
-		       , isExpanded(tmp)
-		       , *counter
-		       , prefix
-		       , substring(tmp->text,10)
-		       , TotalSize(tmp)
-		       , tmp->id
-		       , tmp->flags
-		       , ChildCount(tmp, false)
-		       , ChildCount(tmp, true)
-		       , TotalNodeCount(tmp)
-		       );
-		 */
+
 		s_segments* segs = splitIntoSegments(tmp->text, 60);
 		int y = 0;
 		if (tmp->text != NULL) {
@@ -433,12 +415,13 @@ void PrintTreeItem(const ND* node, int offset, int *counter,  node_method method
 			//printf("char at %d (%d) => %c\n", c, (segs->segments[0]->string)[c], (segs->segments[0]->string)[c]);
 			c++;
 		}
-		printf("[depth=%d-id/%d-count/%2d] %s %s \n"
+		printf("[depth=%d-id/%d-count/%2d] %s %s %ld\n"
 		       , offset
 		       , tmp->id
 		       , *counter
 		       , prefix
 		       , segs->segments[y]->string
+		       , tmp->creationTime
 		       );
 		if (segs->count > 1) {
 			for (y = 1; y < segs->count; y++) {

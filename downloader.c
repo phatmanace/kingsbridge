@@ -82,7 +82,7 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
         char* text = cjtx->valuestring;
         char* tx = malloc(strlen(text) + 1);
         strcpy(tx, text);
-        ND* newnode = newCommentTreeNode(vcjid);
+        ND* newnode = nCmmt(vcjid);
         int link_count = 0;
         listolinks hyperlinks;
         hyperlinks.links = NULL;	
