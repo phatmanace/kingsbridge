@@ -3,6 +3,7 @@
 comment_test.dSYM/Contents/Resources/DWARF/comment_test
 curses_demo.dSYM/
 bin/
+.idea/
 tbin/
 cscope.out
 ll_test_queue.d
