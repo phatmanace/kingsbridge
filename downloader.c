@@ -69,30 +69,37 @@ void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int se
 	args->callback(1, "CJSON Parsing didn't go well :(\n");
    }else{
       int vcjid = cJSON_GetObjectItem(json, "id")->valueint;
-      cJSON *cjtx = cJSON_GetObjectItem(json, "text");
+      cJSON *cjtx     = cJSON_GetObjectItem(json, "text");
+      cJSON *cscore   = cJSON_GetObjectItem(json, "score");
       cJSON *cjparent = cJSON_GetObjectItem(json, "parent");
+      if (cscore){
+		int score = cscore->valueint;
+		args->callback(1, "Found a score %d", score);
+      }else{
+		args->callback(1, "Didn't find  a score");
+      }
       if (cjtx) {
-      char* text = cjtx->valuestring;
-      char* tx = malloc(strlen(text) + 1);
-      strcpy(tx, text);
-      ND* newnode = newCommentTreeNode(vcjid);
-      int link_count = 0;
-      listolinks hyperlinks;
-      hyperlinks.links = NULL;	
-      pthread_mutex_lock(&lock);
-      newnode->text = extract_links(url_decode(dedup(tx)), &hyperlinks, &link_count);
-      pthread_mutex_unlock(&lock);
-      newnode->linkcount = link_count;
-      if(link_count > 0){
-         args->callback(1, "Hyperlinks are %p, link #1 is %s", &hyperlinks, hyperlinks.links[0]);
-         args->callback(1, "Processed: %s", newnode->text);
-         args->callback(1, "Original: %s", tx);
-      }
-      newnode->links = hyperlinks.links;
-      if (cjparent) {
-         newnode->parentid = cjparent->valueint;
-      }
-         args->noderay[args->last_pushed_elem++] = newnode;
+        char* text = cjtx->valuestring;
+        char* tx = malloc(strlen(text) + 1);
+        strcpy(tx, text);
+        ND* newnode = newCommentTreeNode(vcjid);
+        int link_count = 0;
+        listolinks hyperlinks;
+        hyperlinks.links = NULL;	
+        pthread_mutex_lock(&lock);
+        newnode->text = extract_links(url_decode(dedup(tx)), &hyperlinks, &link_count);
+        pthread_mutex_unlock(&lock);
+        newnode->linkcount = link_count;
+        if(link_count > 0){
+           args->callback(1, "Hyperlinks are %p, link #1 is %s", &hyperlinks, hyperlinks.links[0]);
+           args->callback(1, "Processed: %s", newnode->text);
+           args->callback(1, "Original: %s", tx);
+        }
+        newnode->links = hyperlinks.links;
+        if (cjparent) {
+           newnode->parentid = cjparent->valueint;
+        }
+           args->noderay[args->last_pushed_elem++] = newnode;
       }
       cJSON *cjkids = cJSON_GetObjectItem(json, "kids");
       if (cjkids) {

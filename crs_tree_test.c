@@ -17,7 +17,7 @@
 #define _TS_CURSES_DEBUG 1
 #define MODE_NORMAL 0
 #define MODE_LOADING 1
-#define SMALL_HN_ARTICLE 18113926
+#define SMALL_HN_ARTICLE 18154825
 #define BIG_HN_ARTICLE 18063893
 #define BAD_HN_ARTICLE 18063893
 #define HN_ARTICLE SMALL_HN_ARTICLE
@@ -129,22 +129,16 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 		zlog_info(c, "Null Render (mode=%d, rowindex=%d)", mode, rowindex);
 		return;
 	}
+	/*
 	zlog_info(c, "[%d/%d]    Real_rende_call() %s at row %d/%d = col %d/%d",
 		  rowindex, mode,  node->text,
 		  *row, isExpanded(node), column, basecolumn);
+	*/
 	if (node->children != NULL && isExpanded(node)) {
 		mvwhline(win, *row, column -  1, ACS_HLINE, 2 );
 		mvwhline(win, *row, column - 1, ACS_URCORNER, 1 );
 
-		//if (rowindex > 0) {
-		//	mvwvline(win, (*row) - 1, column -  2, ACS_VLINE, 2 );
-		//}
 	}else{
-		//if (node->children != NULL) {
-		//	mvwhline(win, *row, column -  2, ACS_PLUS, 1 );
-		//}else{
-		//	//mvwhline(win, *row, column -  2, ACS_VLINE, 1 );
-		//}
 	}
 	int _fkd = column + 1;
 	/*
@@ -161,7 +155,7 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 				break;
 			}
 			mvwvline(win, (*row),  _fkd, ACS_VLINE, 1 );
-			zlog_info(c, "         Working back, col now %d, %d, %d", node->_ft_depth,  _fkd, column);
+			//zlog_info(c, "         Working back, col now %d, %d, %d", node->_ft_depth,  _fkd, column);
 		}
 	}
 	if (rowindex == _selected) {
@@ -183,15 +177,16 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 	}
 
 	wmove(win, *row, basecolumn - 3);  wprintw(win, "%d", *row);
+	// Actually draw the row text 
 	if (node->children != NULL && !isExpanded(node)) {
-		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "(%d) %s",  TotalSize(node->children), substring(node->text, 60));
+		wmove(win, *row, column + SPLINE_COL);  wprintw(win, "[%d|%d] %s",  TotalSize(node->children), ChildCount(node, SHALLOW_DEPTH), substring(node->text, 60));
 	}else{
 		wmove(win, *row, column + SPLINE_COL);  wprintw(win, substring(node->text, 60));
 	}
 	wattron(win, COLOR_PAIR(3));
-	wmove(win, *row, 85); wprintw(win, "cc=%3d cc=%3d d=%4d ",
-				      ChildCount(node, false),
-				      ChildCount(node, true),
+	wmove(win, *row, 85); wprintw(win, "cc=%3d ccT=%3d d=%2d ",
+				      ChildCount(node, SHALLOW_DEPTH),
+				      ChildCount(node, DEEP_DEPTH),
 				      node->_ft_depth
 				      );
 	wattroff(win, COLOR_PAIR(3));
@@ -200,13 +195,16 @@ void RenderRow(WINDOW* win, ND* node, int* row, int basecolumn, int rowindex,  i
 		wattroff(win, COLOR_PAIR(2));
 	}
 
-	zlog_info(c, "Done Rendering Leaving..");
+	//zlog_info(c, "RenderRow(): Finish main render loop");
 	(*row)++;
+
+
+	// Draw in window information 
 
 	wattron(win, COLOR_PAIR(3));
 	wmove(win, 2, 55); wprintw(win, "cc=%3d tcc=%3d d=%4d TTS=%4d SEL=%3d SR=%d R=%3d, NB=%3d B=%d, WS=%d",
-				      ChildCount(node, false),
-				      ChildCount(node, true),
+				      ChildCount(node, SHALLOW_DEPTH),
+				      ChildCount(node, DEEP_DEPTH),
 				      node->_ft_depth,
 				      _total_tree_size,
 				      _selected,
@@ -265,12 +263,12 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 	wattron(win, COLOR_PAIR(2));
 	zlog_info(c, "Starting to parse the tree");
 	if(mode == MODE_LOADING){
-		wprintw(win, "Loading in articles...one moment please  ");
+		wprintw(win, "Loading in articles...one moment please ............ ");
 	}else{
 		wprintw(win, "(%d/%d) - News Comments for article ( %d in total) ", WINDOW_SIZE, LINES, TotalSize(tree) );
 	}
-	wmove(win, 0,  COLS - 10 );
-	wprintw(win, "[%d]", COLS);
+	wmove(win, 0,  COLS - 15 );
+	wprintw(win, "[%d-%d]", COLS, WINDOW_SIZE);
 	wattroff(win, COLOR_PAIR(2));
 	wattroff(win, A_BOLD);
 
@@ -311,7 +309,7 @@ void RenderTreeIntoWindow(comment_item_tree* tree)
 			zlog_info(c, "Hit Max, stopping iteration..");
 			break;
 		}
-		zlog_info(c, ">>Rendering  row  %d, ray elem %d - real elem/index %d ", row, row + start_row - 4, chosen_element);
+		//zlog_info(c, ">>Rendering  row  %d, ray elem %d - real elem/index %d ", row, row + start_row - 4, chosen_element);
 		RenderRow(win, _flat[chosen_element], &row, txcol, row - 4, 0, -1);
 	}
 
@@ -400,9 +398,9 @@ ND* BuildTree()
 	gettimeofday(&tv2, NULL);
 	double time_spent = (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 +
 			    (double)(tv2.tv_sec - tv1.tv_sec);
-	zlog_info(c, "Downloaded artciles in %lf Seconds", time_spent);
+	zlog_info(c, "Downloaded articles in %lf Seconds", time_spent);
 
-	ND* root = newCommentTreeNodeWithText( "Article Head", id);
+	ND* root = newCommentTreeNodeWithText( "Article Header would go here", id);
 	buildCommentTree(root, args->noderay, 1000, 0);
 	free(args);
 	return root;
@@ -448,16 +446,6 @@ int main(void)
 
 
 	zlog_info(c, "Program starting... ");
-	DIR           *d;
-	struct dirent *dir;
-	d = opendir("/var/tmp");
-	if (d) {
-		while ((dir = readdir(d)) != NULL) {
-			zlog_info(c, "%s", dir->d_name);
-		}
-
-		closedir(d);
-	}
 
 	zlog_info(c, "Created Tree From Sample Text..");
 	SetExpansionState(tree, TRUE);
@@ -499,7 +487,7 @@ int main(void)
 
 	int ch;
 	while ((ch = getch()) != KEY_F(4)) {
-		zlog_info(c, "Trapped Keypress  %d", ch );
+		//zlog_info(c, "Trapped Keypress  %d", ch );
 		MEVENT event;
 		switch (ch) {
 		case KEY_RESIZE:
@@ -516,19 +504,15 @@ int main(void)
 			RefreshData();
 			break;
 		case KEY_LEFT:
-			zlog_info(c, "Left key");
 			toggleExpand(win, false);
 			break;
 		case KEY_RIGHT:
-			zlog_info(c, "Right key");
 			toggleExpand(win, true);
 			break;
 		case KEY_UP:
-			zlog_info(c, "Up Key");
 			moveUp(win);
 			break;
 		case KEY_DOWN:
-			zlog_info(c, "Down Key");
 			moveDown(win);
 			break;
 
@@ -557,8 +541,9 @@ void toggleExpand(WINDOW* win, bool newState)
 }
 void moveDown(WINDOW* win)
 {
-	zlog_info(c, "is selected %d > %d\n", _selected, _total_tree_size);
+	zlog_info(c, "[MoveDown()] is selected %d , _total= %d WS=%d", _selected, _total_tree_size,WINDOW_SIZE);
 	if (_selected - start_row >= WINDOW_SIZE - 1) {
+		zlog_info(c, "Scrolling off bottom of screen");
 		start_row++;
 		_selected++;
 		RenderTreeIntoWindow( tree);
@@ -567,14 +552,15 @@ void moveDown(WINDOW* win)
 
 	}
 	if (_selected < (_total_tree_size - 1)) {
+		zlog_info(c, "nudging down a row");
 		_selected++;
 		RenderTreeIntoWindow( tree);
 		wrefresh(win);
 	}else{
+		zlog_info(c, "At bottom");
 		start_row++;
 		RenderTreeIntoWindow( tree);
 		wrefresh(win);
-		zlog_info(c, "At bottom");
 	}
 }
 void moveUp(WINDOW* win)

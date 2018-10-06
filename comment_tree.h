@@ -1,5 +1,7 @@
 #ifndef COMMENT_TREE_H
 #define COMMENT_TREE_H
+#define SHALLOW_DEPTH false
+#define DEEP_DEPTH true
 
 #include <stdbool.h>
 #include "zlog.h"

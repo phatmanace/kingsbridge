@@ -10,8 +10,17 @@ all: bin/comment_demo bin/curses_tree bin/t_downloader
 include Makefile.dep
 .phony: all
 
+CCCOLOR="\033[34m"
+LINKCOLOR="\033[34;1m"
+SRCCOLOR="\033[33m"
+BINCOLOR="\033[37;1m"
+MAKECOLOR="\033[32;1m"
+ENDCOLOR="\033[0m"
 
-SILENTCC = @printf '%b %b' ${CC}
+SILENTCC  = @printf '       %b %b\n' ${CCCOLOR}${CC}${ENDCOLOR} $@ 1>&2;
+SILENTLNK = @printf '[LNK]  %b %b\n' ${LINKCOLOR}${CC}${ENDCOLOR} $@ 1>&2;
+KBCC=$(SILENTCC)$(CC)
+KBLNK=$(SILENTLNK)$(CC)
 
 
 bin:
@@ -23,16 +32,16 @@ solib:
 
 
 %.o: %.c
-	 ${CC} -c $<
+	 ${KBCC} -c $<
 
 bin/comment_demo: curses_sampler.c
-	${CC} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+	${KBLNK} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/t_downloader: t_downloader.c
-	${CC} -g -o bin/t_downloader   t_downloader.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+	${KBLNK} -g -o bin/t_downloader   t_downloader.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
-	${CC} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
+	${KBLNK} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
 			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
 .phony: clean
 
