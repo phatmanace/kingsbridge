@@ -24,5 +24,13 @@ struct thread_args {
 	int error_code;
 };
 
+void NewsBlurLogin(pthread_mutex_t lock,
+                   struct thread_args* args,
+                   unsigned int self,
+                   CURL* curl,
+                   char* username,
+                   char* password
+);
+
 void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int self, CURL* curl);
 void init_string(struct string *s);

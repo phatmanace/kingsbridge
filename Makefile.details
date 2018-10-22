@@ -3,10 +3,14 @@ LD_LIB := -lzlog -lncurses -lcurl
 
 all: solib
 all: bin tbin comment_tree.o queue.o downloader.o t_downloader.o
+all: Articles.o
 all: string_utils.o comment_fetch.o
 all: ltestqueue.o
+all: bin/simple
 all: bin/comment_demo bin/curses_tree bin/t_downloader
 all: tbin/t_simple_comment_test
+all: tbin/t_article
+all: tbin/t_newsblur
 
 include Makefile.dep
 .phony: all
@@ -37,12 +41,20 @@ solib:
 
 bin/comment_demo: curses_sampler.c
 	${KBLNK} -g -o bin/comment_demo   curses_sampler.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+bin/simple: simple.c
+	${KBLNK} -g -o bin/simple   simple.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 tbin/t_simple_comment_test: comment_tester.c comment_tree.c string_utils.c
 	${KBLNK} -g -o tbin/t_simple_comment_test   comment_tester.c comment_tree.o string_utils.o  ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/t_downloader: t_downloader.c
 	${KBLNK} -g -o bin/t_downloader   t_downloader.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
+
+tbin/t_article: t_article.c  Articles.c
+	${KBLNK} -g -o tbin/t_article   t_article.c  Articles.o   ${INC} ${LIB} ${COPTS} ${LD_LIB}
+
+tbin/t_newsblur: t_newsblur.c downloader.c
+	${KBLNK} -g -o tbin/t_newsblur   t_newsblur.c  downloader.o queue.o string_utils.o comment_tree.o   ${INC} ${LIB} ${ALL_LIBS} ${COPTS} ${LD_LIB}
 
 bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
 	${KBLNK} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \

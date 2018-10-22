@@ -11,6 +11,8 @@
 #include "yajl/yajl_tree.h"
 #include "zlog.h"
 #include "downloader.h"
+//#pragma GCC diagnostic ignored "-Wno-nonnull"
+//#pragma GCC diagnostic push
 
 
 

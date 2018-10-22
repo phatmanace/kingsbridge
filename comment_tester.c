@@ -30,12 +30,12 @@ int main(void)
 	printf("Simple Comment tester\n");
 	ND* root = nCmmtText("Test Head", 10);
 	dump(root, "Initial Dump...");
-    TreeFree(root);
-    return 1;
+
+
 
 
     AppendChild(root, nCmmtText("Test Child 1", 10));
     AppendChild(root, nCmmtTextTime("Test Child 2", 10, (long)time(NULL)));
-    dump(root, "Initial Dump...");
+    dump(root, "2nd Dump...");
  	return 1;
 }
