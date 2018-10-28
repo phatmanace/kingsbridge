@@ -4,6 +4,7 @@ LD_LIB := -lzlog -lncurses -lcurl
 all: solib
 all: bin tbin comment_tree.o queue.o downloader.o t_downloader.o
 all: Articles.o
+all: stories.o
 all: string_utils.o comment_fetch.o
 all: ltestqueue.o
 all: bin/simple
@@ -14,6 +15,7 @@ all: tbin/t_newsblur
 
 include Makefile.dep
 .phony: all
+
 
 CCCOLOR="\033[34m"
 LINKCOLOR="\033[34;1m"
@@ -27,6 +29,7 @@ SILENTLNK = @printf '[LNK]  %b %b\n' ${LINKCOLOR}${CC}${ENDCOLOR} $@ 1>&2;
 KBCC=$(SILENTCC)$(CC)
 KBLNK=$(SILENTLNK)$(CC)
 
+$(info   VAR is $(CC))
 
 bin:
 	mkdir  bin
@@ -54,10 +57,10 @@ tbin/t_article: t_article.c  Articles.c
 	${KBLNK} -g -o tbin/t_article   t_article.c  Articles.o   ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 tbin/t_newsblur: t_newsblur.c downloader.c
-	${KBLNK} -g -o tbin/t_newsblur   t_newsblur.c  downloader.o queue.o string_utils.o comment_tree.o   ${INC} ${LIB} ${ALL_LIBS} ${COPTS} ${LD_LIB}
+	${KBLNK} -g -o tbin/t_newsblur   t_newsblur.c  downloader.o queue.o string_utils.o comment_tree.o stories.o   ${INC} ${LIB} ${ALL_LIBS} ${COPTS} ${LD_LIB}
 
-bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o
-	${KBLNK} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o queue.o comment_tree.o \
+bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o stories.o
+	${KBLNK} -pthread -g -o bin/curses_tree   crs_tree_test.c comment_fetch.o string_utils.o downloader.o stories.o queue.o comment_tree.o \
 			  ${INC} ${LIB} ${ALL_LIBS} ${COPTS}
 .phony: clean
 

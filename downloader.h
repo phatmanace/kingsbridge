@@ -5,6 +5,7 @@
 #include "string_utils.h"
 #include "curl/curl.h"
 #include <stdlib.h>
+#include "stories.h"
 typedef void (*msgcall)(int, char*, ...);
 
 struct string {
@@ -24,13 +25,28 @@ struct thread_args {
 	int error_code;
 };
 
-void NewsBlurLogin(pthread_mutex_t lock,
+char* NewsBlurLogin(pthread_mutex_t lock,
                    struct thread_args* args,
                    unsigned int self,
                    CURL* curl,
                    char* username,
                    char* password
 );
+int NewsBlurArticles(pthread_mutex_t lock,
+          struct thread_args* args,
+          unsigned int self,
+          CURL* curl,
+	  char* token,
+	  int hacker_news_feed_id,
+	  int page,
+	  Story* list
+          );
+void NewsBlurFeeds(pthread_mutex_t lock,
+          struct thread_args* args,
+          unsigned int self,
+          CURL* curl,
+	  char* token
+          );
 
 void downloadURL(pthread_mutex_t lock, struct thread_args* args, unsigned int self, CURL* curl);
 void init_string(struct string *s);
