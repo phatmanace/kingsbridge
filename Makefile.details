@@ -47,7 +47,7 @@ bin/comment_demo: curses_sampler.c
 bin/simple: simple.c
 	${KBLNK} -g -o bin/simple   simple.c    ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
-tbin/t_simple_comment_test: comment_tester.c comment_tree.c string_utils.c
+tbin/t_simple_comment_test: comment_tester.c comment_tree.o string_utils.o
 	${KBLNK} -g -o tbin/t_simple_comment_test   comment_tester.c comment_tree.o string_utils.o  ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
 bin/t_downloader: t_downloader.c
@@ -56,7 +56,7 @@ bin/t_downloader: t_downloader.c
 tbin/t_article: t_article.c  Articles.c
 	${KBLNK} -g -o tbin/t_article   t_article.c  Articles.o   ${INC} ${LIB} ${COPTS} ${LD_LIB}
 
-tbin/t_newsblur: t_newsblur.c downloader.c stories.o
+tbin/t_newsblur: t_newsblur.c downloader.o stories.o
 	${KBLNK} -g -o tbin/t_newsblur   t_newsblur.c  downloader.o queue.o string_utils.o comment_tree.o stories.o   ${INC} ${LIB} ${ALL_LIBS} ${COPTS} ${LD_LIB}
 
 bin/curses_tree: crs_tree_test.c  comment_fetch.o  comment_tree.o string_utils.o downloader.o queue.o stories.o

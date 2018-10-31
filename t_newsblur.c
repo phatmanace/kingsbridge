@@ -61,6 +61,11 @@ int main(int argc, char* argv[]){
     printf("Requesting from curl... \n");
     char* token = NewsBlurLogin(lock, args, 0, curl, username, password);
     NewsBlurFeeds(lock, args, 0, curl, token );
+    if(token == NULL){
+	    printf("Login to Newsblur failed\n");
+	    exit(-1);
+    }
+    printf("Token was %s\n", token);
     int c = 1;
     int t = 0;
     int cn = -1;
