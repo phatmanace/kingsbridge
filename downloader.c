@@ -246,7 +246,7 @@ int NewsBlurArticles(pthread_mutex_t lock,
 	  char* token,
 	  int hacker_news_feed_id,
 	  int page,
-	  Story* story
+	  Story** story
           )
 {
 
@@ -276,10 +276,13 @@ int NewsBlurArticles(pthread_mutex_t lock,
 	cJSON *story_title = cJSON_GetObjectItem(current_element, "story_title");
 	cJSON *story_hash  = cJSON_GetObjectItem(current_element, "story_hash");
 	printf("[%18s]..%s\n",  story_hash->valuestring, story_title->valuestring );
-	appendStory(story, story_hash->valuestring, story_title->valuestring );
+	appendStory(*story, story_hash->valuestring, story_title->valuestring );
 	story_count++;
     }
-	return(story_count);
+	if((*story)->title == NULL){
+		*story = (*story)->next;
+	}
+    return(story_count);
 }
 void DownloadArticleHeaders(pthread_mutex_t lock, struct thread_args* args, unsigned int self, CURL* curl) {
     struct string response_string;

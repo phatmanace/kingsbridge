@@ -39,7 +39,7 @@ int NewsBlurArticles(pthread_mutex_t lock,
 	  char* token,
 	  int hacker_news_feed_id,
 	  int page,
-	  Story* list
+	  Story** list
           );
 void NewsBlurFeeds(pthread_mutex_t lock,
           struct thread_args* args,

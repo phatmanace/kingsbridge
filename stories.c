@@ -9,8 +9,7 @@
 
 
 int StorySize(Story* head);
-void print(Story* head);
-void print(Story* head);
+void printStory(Story* head);
 void printl(int depth, char* prefix, Story* head);
 void MoveStory(Story** destref, Story** sourceRef);
 void FrontBackSplit(Story* source, Story** fronthalf, Story** backhalf, int depth);
@@ -24,7 +23,7 @@ Story* newStory(){
     return n;
 }
 
-void appendStory(Story* head, char*  _newtitle, char* _newhash){
+void appendStory(Story* head, char*  _newhash, char* _newtitle){
     while(head->next){ head=head->next;}
     Story* n = malloc(sizeof(Story));
     n->title = strdup(_newtitle);
@@ -33,29 +32,32 @@ void appendStory(Story* head, char*  _newtitle, char* _newhash){
     head->next = n;
 }
 
-void print(Story* head){
+void printStory(Story* head){
 
+    int y = 1;
     int sz = StorySize(head);
     while(head){
-        printf("[%p]=>{%s}", head, head->title);
+        printf("[%3d][%p]=>{%s}->{%s}",y,  head, head->title, head->hash);
         //printf("{%d}", head->data);
 
         if(head->next){
             head = head->next;
-            printf("->");
+            printf("\n");
         }else{
             break;
         }
+	y++;
     }
-    printf("[total:%d]\n", sz);
+    printf("\n[total:%d]\n", sz);
 }
 
 void printl(int depth, char* prefix, Story* head){
 
+    int y = 1;
     int sz = StorySize(head);
     printf("[%*s]",(depth + 1) * 3, prefix);
     while(head){
-        printf("[%p]=>{%s}", head, head->title);
+        printf("[%d][%p]=>{%s}", y, head, head->title);
         //printf("{%d}", head->data);
 
         if(head->next){
@@ -64,12 +66,19 @@ void printl(int depth, char* prefix, Story* head){
         }else{
             break;
         }
+	y++;
     }
     printf("[total:%d]\n", sz);
 }
 
 int StorySize(Story* head){
     int i = 0;
+	
+    if(head){
+	i++;
+    }else{
+	return 0;
+    }
     while(head->next){
         i++;
         head = head->next;

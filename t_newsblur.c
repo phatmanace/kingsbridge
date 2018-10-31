@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "downloader.h"
+#include <libconfig.h>
 
 
 int main(int argc, char* argv[]){
@@ -17,6 +18,23 @@ int main(int argc, char* argv[]){
     )
     {
     */
+
+    config_t cfg;
+    config_init(&cfg);
+    config_setting_t *group = config_root_setting(&cfg);
+    config_setting_t *root = config_setting_add(group, "hndata", CONFIG_TYPE_GROUP);
+    config_setting_t *setting = config_setting_add(root, "one", CONFIG_TYPE_STRING);
+    config_setting_set_string(setting, "blah");
+    config_setting_t *ray = config_setting_add(root, "articles", CONFIG_TYPE_ARRAY);
+    for(int i = 0; i < 100;i++){
+	config_setting_t *ray_item = config_setting_add(ray, NULL, CONFIG_TYPE_STRING);
+	config_setting_set_string(ray_item, "Wimble");
+    }
+    if(!config_write_file(&cfg, "/var/tmp/foo.cfg")){
+	printf("Failed to write to file");	
+    }
+    config_destroy(&cfg);
+
     printf("count of args == %d\n", argc);
     int y = 1;
     char* username;
@@ -46,12 +64,13 @@ int main(int argc, char* argv[]){
     int c = 1;
     int t = 0;
     int cn = -1;
-    Story* story;
+    Story* story = newStory();
     while(cn != 0){
-    	cn = NewsBlurArticles(lock, args, 0, curl, token, 6327282, c, story );
+    	cn = NewsBlurArticles(lock, args, 0, curl, token, 6327282, c, &story );
 	t += cn;
 	c++;
     }
-    printf("Total Articles downloaded: %d\n", t);
+    printStory(story);
+    printf("Total Articles downloaded: %d (cf:%d)\n", t, StorySize(story));
 
 }
